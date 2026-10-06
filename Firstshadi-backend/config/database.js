@@ -1,3 +1,159 @@
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'n1a2y3a4k5@9090',
+  database: process.env.DB_NAME || 'firstmarriage',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
+});
+
+export const connectDB = async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('✅ MySQL Database connected successfully');
+    console.log(`📊 Database: ${process.env.DB_NAME || 'firstmarriage'}`);
+    connection.release();
+    await ensureSchema();
+    await showAdminStatus();   // 🔥 NEW: dikhata hai kitne admins hain
+  } catch (error) {
+    console.error('❌ Database connection failed:', error.message);
+    if (process.env.NODE_ENV === 'production') process.exit(1);
+  }
+};
+
+const ensureSchema = async () => {
+  const conn = await pool.getConnection();
+  try {
+    // =====================
+    // is_admin column
+    // =====================
+    const [adminCol] = await conn.query(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'is_admin'"
+    );
+    if (adminCol.length === 0) {
+      console.log('⚙️  Adding users.is_admin...');
+      await conn.query("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE AFTER is_premium");
+      try {
+        await conn.query("ALTER TABLE users ADD INDEX idx_is_admin (is_admin)");
+      } catch (e) {
+        if (!String(e.message).includes('Duplicate')) throw e;
+      }
+      console.log('✅ users.is_admin added');
+    } else {
+      console.log('✅ users.is_admin already exists');
+    }
+
+    // =====================
+    // is_active column
+    // =====================
+    const [activeCol] = await conn.query(
+      "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'is_active'"
+    );
+    if (activeCol.length === 0) {
+      console.log('⚙️  Adding users.is_active...');
+      await conn.query("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE AFTER is_admin");
+      console.log('✅ users.is_active added');
+    } else {
+      console.log('✅ users.is_active already exists');
+    }
+
+    // =====================
+    // reports table
+    // =====================
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS reports (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        reporter_id INT NOT NULL,
+        reported_user_id INT NOT NULL,
+        reason VARCHAR(100) NOT NULL,
+        details TEXT,
+        status ENUM('pending','reviewed','dismissed','action_taken') DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        resolved_at TIMESTAMP NULL,
+        FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (reported_user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_status (status),
+        INDEX idx_reported (reported_user_id)
+      )
+    `);
+
+    // =====================
+    // contact_messages table
+    // =====================
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS contact_messages (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        status ENUM('new','read','resolved') DEFAULT 'new',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_status (status)
+      )
+    `);
+
+    // =====================
+    // success_stories table
+    // =====================
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS success_stories (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        couple_names VARCHAR(255) NOT NULL,
+        image_url VARCHAR(500),
+        story TEXT NOT NULL,
+        location VARCHAR(255),
+        married_on DATE,
+        is_published BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_published (is_published)
+      )
+    `);
+
+    console.log('✅ Schema verified/updated');
+  } catch (error) {
+    console.error('❌ Schema error:', error.message);
+  } finally {
+    conn.release();
+  }
+};
+
+// 🔥 NEW: On startup, tells you how many admins exist + which emails
+const showAdminStatus = async () => {
+  try {
+    const [admins] = await pool.query(
+      "SELECT email, name FROM users WHERE is_admin = TRUE"
+    );
+    if (admins.length === 0) {
+      console.log('');
+      console.log('╔════════════════════════════════════════════════════════╗');
+      console.log('║  ⚠️  NO ADMIN USERS FOUND                              ║');
+      console.log('║                                                        ║');
+      console.log('║  Run this in MySQL to make yourself admin:             ║');
+      console.log("║  UPDATE users SET is_admin = TRUE                      ║");
+      console.log("║    WHERE email = 'your-email@example.com';             ║");
+      console.log('╚════════════════════════════════════════════════════════╝');
+      console.log('');
+    } else {
+      console.log(`👑 ${admins.length} admin user(s):`);
+      admins.forEach((a) => console.log(`   • ${a.email} (${a.name})`));
+    }
+  } catch (error) {
+    console.error('⚠️  Could not check admin status:', error.message);
+  }
+};
+
+export { pool };
+
+
+
 // import mysql from 'mysql2/promise';
 // import dotenv from 'dotenv';
 
@@ -240,68 +396,69 @@
 
 
 
-import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
+// import mysql from 'mysql2/promise';
+// import dotenv from 'dotenv';
 
-dotenv.config();
+// dotenv.config();
 
-// Database connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'n1a2y3a4k5@9090',
-  database: process.env.DB_NAME || 'firstmarriage',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0
-});
+// // Database connection pool
+// const pool = mysql.createPool({
+//   host: process.env.DB_HOST || 'localhost',
+//   user: process.env.DB_USER || 'root',
+//   password: process.env.DB_PASSWORD || 'n1a2y3a4k5@9090',
+//   database: process.env.DB_NAME || 'firstmarriage',
+//   waitForConnections: true,
+//   connectionLimit: 10,
+//   queueLimit: 0,
+//   enableKeepAlive: true,
+//   keepAliveInitialDelay: 0
+// });
 
-// Connect and initialize database
-export const connectDB = async () => {
-  try {
-    const connection = await pool.getConnection();
-    console.log('✅ MySQL Database connected successfully');
-    console.log(`📊 Database: ${process.env.DB_NAME || 'firstmarriage'}`);
-    connection.release();
+// // Connect and initialize database
+// export const connectDB = async () => {
+//   try {
+//     const connection = await pool.getConnection();
+//     console.log('✅ MySQL Database connected successfully');
+//     console.log(`📊 Database: ${process.env.DB_NAME || 'firstmarriage'}`);
+//     connection.release();
     
-    // Check if tables exist (optional verification)
-    await verifyTables();
-  } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1);
-    }
-  }
-};
+//     // Check if tables exist (optional verification)
+//     await verifyTables();
+//   } catch (error) {
+//     console.error('❌ Database connection failed:', error.message);
+//     if (process.env.NODE_ENV === 'production') {
+//       process.exit(1);
+//     }
+//   }
+// };
 
-// Verify tables exist (without creating them)
-const verifyTables = async () => {
-  const connection = await pool.getConnection();
-  try {
-    // Check if users table exists
-    const [tables] = await connection.query(
-      "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users'",
-      [process.env.DB_NAME || 'firstmarriage']
-    );
+// // Verify tables exist (without creating them)
+// const verifyTables = async () => {
+//   const connection = await pool.getConnection();
+//   try {
+//     // Check if users table exists
+//     const [tables] = await connection.query(
+//       "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users'",
+//       [process.env.DB_NAME || 'firstmarriage']
+//     );
 
-    if (tables.length === 0) {
-      console.warn('⚠️  Tables not found! Please run the SQL script in MySQL Workbench first.');
-      console.warn('📝 SQL file location: database.sql');
-    } else {
-      // Count tables
-      const [countResult] = await connection.query(
-        "SELECT COUNT(*) as total FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?",
-        [process.env.DB_NAME || 'firstmarriage']
-      );
-      console.log(`✅ Found ${countResult[0].total} tables in database`);
-    }
-  } catch (error) {
-    console.error('❌ Error verifying tables:', error.message);
-  } finally {
-    connection.release();
-  }
-};
+//     if (tables.length === 0) {
+//       console.warn('⚠️  Tables not found! Please run the SQL script in MySQL Workbench first.');
+//       console.warn('📝 SQL file location: database.sql');
+//     } else {
+//       // Count tables
+//       const [countResult] = await connection.query(
+//         "SELECT COUNT(*) as total FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?",
+//         [process.env.DB_NAME || 'firstmarriage']
+//       );
+//       console.log(`✅ Found ${countResult[0].total} tables in database`);
+//     }
+//   } catch (error) {
+//     console.error('❌ Error verifying tables:', error.message);
+//   } finally {
+//     connection.release();
+//   }
+// };
 
-export { pool };
+// export { pool };
+

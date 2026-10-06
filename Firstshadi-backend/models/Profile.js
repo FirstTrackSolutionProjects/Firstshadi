@@ -227,9 +227,12 @@ export class Profile {
       query += ' AND ' + conditions.join(' AND ');
     }
 
-    // Order by
-    const orderBy = filters.order_by || 'p.created_at';
-    const orderDir = filters.order_dir || 'DESC';
+    // Whitelist order columns
+    const allowedOrderBy = [
+      'p.created_at', 'p.age', 'p.height', 'p.first_name', 'u.name', 'u.is_premium'
+    ];
+    const orderBy = allowedOrderBy.includes(filters.order_by) ? filters.order_by : 'p.created_at';
+    const orderDir = (filters.order_dir || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     query += ` ORDER BY ${orderBy} ${orderDir}`;
 
     // Pagination
@@ -280,7 +283,14 @@ export class Profile {
   static async getMatches(userId, filters = {}) {
     // Get user profile
     const userProfile = await this.findByUserId(userId);
-    if (!userProfile) return { data: [], pagination: { total: 0, limit: 20, offset: 0 } };
+    if (filters.minAge || filters.min_age) {
+      conditions.push('p.age >= ?');
+      params.push(filters.minAge || filters.min_age);
+    }
+    if (filters.maxAge || filters.max_age) {
+      conditions.push('p.age <= ?');
+      params.push(filters.maxAge || filters.max_age);
+    }
 
     // Build match query based on user preferences
     const searchFilters = {
