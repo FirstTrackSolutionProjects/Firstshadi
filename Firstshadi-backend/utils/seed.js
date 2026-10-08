@@ -119,4 +119,4 @@ const seed = async () => {
   process.exit(0);
 };
 
-seed().catch((e) => { console.error(e); process.exit(1); });
+seed().catch((e) => { console.error(e); process.exit(1); }); 
