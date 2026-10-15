@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS payments (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  order_id VARCHAR(50) UNIQUE NOT NULL,
+  payment_id VARCHAR(50),
+  plan ENUM('7days', '15days', '30days', '3months', '5months', '1year') NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  gst DECIMAL(10, 2),
+  total_amount DECIMAL(10, 2) NOT NULL,
+  status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+  payment_method VARCHAR(50),
+  upi_id VARCHAR(100),
+  card_last_four VARCHAR(4),
+  transaction_id VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  completed_at TIMESTAMP NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_id (user_id),
+  INDEX idx_order_id (order_id),
+  INDEX idx_status (status)
+);

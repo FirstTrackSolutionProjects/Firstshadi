@@ -76,7 +76,10 @@
 
 
 // src/services/api.js
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '');
+if (!API_URL) {
+  throw new Error('Set VITE_API_URL to the deployed backend API URL (for example, https://api.example.com/api).');
+}
 
 // Helper function for API calls
 export const apiCall = async (endpoint, options = {}) => {

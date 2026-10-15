@@ -3,8 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -21,14 +19,13 @@ import successStoryRoutes from './routes/successStoryRoutes.js';
 
 // Config
 import { connectDB } from './config/database.js';
+import { uploadDirectory } from './config/uploads.js';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 const PORT = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Rate limiters
 const limiter = rateLimit({
@@ -54,20 +51,27 @@ app.use(helmet({
 }));
 
 // CORS — include deployed frontend URLs via env
-const allowedOrigins = [
+const developmentOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:5174',
   'http://localhost:5175',
   'http://127.0.0.1:5173',
-  process.env.FRONTEND_URL,
 ].filter(Boolean);
+const configuredOrigins = [process.env.FRONTEND_URL, process.env.FRONTEND_URLS]
+  .filter(Boolean)
+  .flatMap((value) => value.split(',').map((origin) => origin.trim()))
+  .filter(Boolean);
+const allowedOrigins = isProduction ? configuredOrigins : [...developmentOrigins, ...configuredOrigins];
+if (isProduction && allowedOrigins.length === 0) {
+  throw new Error('Set FRONTEND_URL or FRONTEND_URLS to the deployed frontend origin(s).');
+}
 
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
     if (allowedOrigins.includes(origin)) return cb(null, true);
-    return cb(null, true); // in dev; tighten in prod
+    return cb(new Error(`Origin is not allowed by CORS: ${origin}`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -79,7 +83,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+app.use('/uploads', express.static(uploadDirectory, {
   setHeaders: (res) => {
     res.set('Cross-Origin-Resource-Policy', 'cross-origin');
     res.set('Access-Control-Allow-Origin', '*');
@@ -170,7 +174,7 @@ process.on('uncaughtException', (error) => {
   if (process.env.NODE_ENV === 'production') process.exit(1);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API URL: http://localhost:${PORT}/api`);

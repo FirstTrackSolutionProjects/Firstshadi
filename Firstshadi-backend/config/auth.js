@@ -3,7 +3,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'local-development-secret-change-me');
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET must be set in production.');
+}
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 const JWT_REFRESH_EXPIRE = process.env.JWT_REFRESH_EXPIRE || '30d';
 
