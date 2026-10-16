@@ -175,13 +175,6 @@ process.on('uncaughtException', (error) => {
   if (process.env.NODE_ENV === 'production') process.exit(1);
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API URL: http://localhost:${PORT}/api`);
-  connectDB();
-});
-
 export default app;
 
 
@@ -439,12 +432,12 @@ export default app;
 async function startServer() {
   try {
     await runMigrations();
+    await connectDB();
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 API URL: http://localhost:${PORT}/api`);
       console.log(`❤️ Health check: http://localhost:${PORT}/api/health`);
-      connectDB();
     });
   } catch (error) {
     console.error('Migration failed; server was not started:', error.message);
