@@ -1,17 +1,4 @@
 import multer from 'multer';
-import { uploadDirectory } from '../config/uploads.js';
-
-// Configure storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDirectory);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, `profile-${uniqueSuffix}${ext}`);
-  }
-});
 
 // File filter
 const fileFilter = (req, file, cb) => {
@@ -25,7 +12,7 @@ const fileFilter = (req, file, cb) => {
 
 // Create upload middleware
 export const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit

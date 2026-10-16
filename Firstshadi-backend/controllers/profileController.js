@@ -2,6 +2,7 @@ import Profile from '../models/Profile.js';
 import User from '../models/User.js';
 import Connection from '../models/Connection.js';
 import Notification from '../models/Notification.js';
+import { deleteProfilePhoto, uploadProfilePhoto } from '../config/s3.js';
 
 // Create profile (upsert if exists)
 export const createProfile = async (req, res) => {
@@ -126,6 +127,7 @@ export const getMatches = async (req, res) => {
 };
 
 export const uploadPhotos = async (req, res) => {
+  const uploadedUrls = [];
   try {
     const userId = req.user.id;
     const files = req.files;
@@ -136,13 +138,20 @@ export const uploadPhotos = async (req, res) => {
     if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
 
     const existingPhotos = profile.profile_photos || [];
-    const photoUrls = files.map(file => `/uploads/${file.filename}`);
-    const allPhotos = [...existingPhotos, ...photoUrls].slice(0, 10);
+    const availableSlots = Math.max(0, 10 - existingPhotos.length);
+    if (availableSlots === 0) {
+      return res.status(400).json({ success: false, message: 'Maximum of 10 profile photos reached' });
+    }
+    for (const file of files.slice(0, availableSlots)) {
+      uploadedUrls.push(await uploadProfilePhoto(file, userId));
+    }
+    const allPhotos = [...existingPhotos, ...uploadedUrls];
 
     const updatedProfile = await Profile.update(profile.id, { profile_photos: allPhotos });
     return res.status(200).json({ success: true, message: 'Photos uploaded', data: updatedProfile });
   } catch (error) {
     console.error('Upload photos error:', error);
+    await Promise.allSettled(uploadedUrls.map(deleteProfilePhoto));
     return res.status(500).json({ success: false, message: 'Failed to upload photos' });
   }
 };
@@ -171,8 +180,9 @@ export const deletePhoto = async (req, res) => {
     if (index < 0 || index >= photos.length) {
       return res.status(400).json({ success: false, message: 'Invalid photo index' });
     }
-    photos.splice(index, 1);
+    const [removedPhoto] = photos.splice(index, 1);
     const updatedProfile = await Profile.update(profile.id, { profile_photos: photos });
+    deleteProfilePhoto(removedPhoto).catch((error) => console.error('Could not remove profile photo from S3:', error.message));
     return res.status(200).json({ success: true, message: 'Photo deleted', data: updatedProfile });
   } catch (error) {
     console.error('Delete photo error:', error);
@@ -184,7 +194,10 @@ export const deleteProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const profile = await Profile.findByUserId(userId);
-    if (profile) await Profile.delete(profile.id);
+    if (profile) {
+      await Profile.delete(profile.id);
+      await Promise.allSettled((profile.profile_photos || []).map(deleteProfilePhoto));
+    }
     await User.delete(userId);
     return res.status(200).json({ success: true, message: 'Profile deleted successfully' });
   } catch (error) {
