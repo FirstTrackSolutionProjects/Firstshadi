@@ -8,6 +8,7 @@
       "node": ">=20.0.0"
     },
     "scripts": {
+      "prestart": "node utils/migrate.js",
       "start": "node server.js",
       "dev": "nodemon server.js",
       "migrate": "node utils/migrate.js",
