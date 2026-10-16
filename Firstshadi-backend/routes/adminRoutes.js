@@ -262,7 +262,7 @@ router.use(requireAdmin);
 // Dashboard
 router.get('/dashboard', async (req, res) => {
   try {
-    const [userCount] = await pool.query('SELECT COUNT(*) as total FROM users');
+    const [userCount] = await pool.query('SELECT COUNT(*) as total FROM users WHERE is_admin = FALSE');
     const [profileCount] = await pool.query('SELECT COUNT(*) as total FROM profiles');
     const [connectionCount] = await pool.query('SELECT COUNT(*) as total FROM connections WHERE status = "accepted"');
     const [paymentCount] = await pool.query('SELECT COUNT(*) as total FROM payments WHERE status = "completed"');
@@ -286,7 +286,9 @@ router.get('/dashboard', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const { limit = 50, offset = 0, search = '', is_premium, is_verified, is_active } = req.query;
-    let query = 'SELECT id, uuid, name, email, phone, gender, is_verified, is_premium, is_admin, is_active, premium_expiry, created_at FROM users WHERE 1=1';
+    // The owner/admin account is an authentication identity, not a member profile.
+    // Keep it in the users table so it can sign in, but exclude admins from member management.
+    let query = 'SELECT id, uuid, name, email, phone, gender, is_verified, is_premium, is_admin, is_active, premium_expiry, created_at FROM users WHERE is_admin = FALSE';
     const params = [];
 
     if (search) {
@@ -302,7 +304,7 @@ router.get('/users', async (req, res) => {
     params.push(parseInt(limit), parseInt(offset));
 
     const [users] = await pool.query(query, params);
-    const [total] = await pool.query('SELECT COUNT(*) as total FROM users');
+    const [total] = await pool.query('SELECT COUNT(*) as total FROM users WHERE is_admin = FALSE');
     res.json({ success: true, data: users, pagination: { total: total[0].total, limit: parseInt(limit), offset: parseInt(offset) } });
   } catch (error) {
     console.error('Get users error:', error);
@@ -420,7 +422,7 @@ router.get('/stats', async (req, res) => {
         SUM(CASE WHEN is_verified = TRUE THEN 1 ELSE 0 END) as verified_users,
         SUM(CASE WHEN is_premium = TRUE THEN 1 ELSE 0 END) as premium_users,
         SUM(CASE WHEN is_premium = FALSE THEN 1 ELSE 0 END) as free_users
-      FROM users
+      FROM users WHERE is_admin = FALSE
     `);
     const [profileStats] = await pool.query(`
       SELECT COUNT(*) as total_profiles,
