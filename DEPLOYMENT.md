@@ -4,7 +4,7 @@
 
 1. Configure the production environment variables below in the hosting dashboard. Do not upload a `.env` file.
 2. Create a production MySQL database and allow the backend host to connect to it.
-3. Run migrations against that production database before sending users to the site. The backend `prestart` script runs them automatically whenever Hostinger starts it with `npm start`.
+3. The backend runs pending migrations against the configured database before it starts listening.
 4. Create a real admin account, then grant it admin access in the production database. Do not use a sample user's credentials.
 
 ## Render
@@ -18,7 +18,7 @@ Deploy the backend as a **Web Service** with:
 - Environment: copy the keys from `Firstshadi-backend/.env.example` into Render's Environment settings. Render supplies `PORT` automatically.
 - Persistent disk: mount at `/var/data`; set `UPLOAD_DIR=/var/data/uploads`.
 
-The `prestart` script runs `npm run migrate` automatically when the service launches with `npm start`.
+The backend entry point runs pending migrations before opening the HTTP listener.
 
 Deploy the frontend as a **Static Site** with:
 
@@ -32,7 +32,7 @@ After the frontend has a URL, set the backend's `FRONTEND_URL` to that exact ori
 
 ## Hostinger
 
-Use a plan that supports Node.js applications, or a VPS. Deploy the backend from `Firstshadi-backend` with `npm install` and `npm start`; set the environment variables from `Firstshadi-backend/.env.example` in the app settings. The `prestart` script runs migrations automatically before the server starts. Set `UPLOAD_DIR` to a writable directory that persists across app restarts. Allow the app's host to connect to the Hostinger MySQL database.
+Use a plan that supports Node.js applications, or a VPS. Deploy the backend from `Firstshadi-backend` with `npm install` and set the environment variables from `Firstshadi-backend/.env.example` in the app settings. Keep the entry file as `server.js`; it runs pending migrations automatically before the server starts. Set `UPLOAD_DIR` to a writable directory that persists across app restarts. Allow the app's host to connect to the Hostinger MySQL database.
 
 Build the frontend from the repository root with `npm ci && npm run build`, set `VITE_API_URL` to the backend's HTTPS API URL ending in `/api`, and publish the contents of `dist`. Set backend `FRONTEND_URL` to the frontend's exact HTTPS origin.
 

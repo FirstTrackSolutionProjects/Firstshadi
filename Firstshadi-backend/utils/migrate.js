@@ -41,7 +41,7 @@ async function objectExists(connection, object) {
   return rows.length > 0;
 }
 
-async function runMigrations() {
+export async function runMigrations() {
   const connection = await pool.getConnection();
   try {
     await connection.query(`
@@ -77,11 +77,17 @@ async function runMigrations() {
     console.log('Database migrations are up to date.');
   } finally {
     connection.release();
-    await pool.end();
   }
 }
 
-runMigrations().catch((error) => {
-  console.error('Migration failed:', error.message);
-  process.exitCode = 1;
-});
+const isDirectRun = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  runMigrations()
+    .catch((error) => {
+      console.error('Migration failed:', error.message);
+      process.exitCode = 1;
+    })
+    .finally(() => pool.end());
+}

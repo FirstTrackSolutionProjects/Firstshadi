@@ -20,6 +20,7 @@ import successStoryRoutes from './routes/successStoryRoutes.js';
 // Config
 import { connectDB } from './config/database.js';
 import { uploadDirectory } from './config/uploads.js';
+import { runMigrations } from './utils/migrate.js';
 
 dotenv.config();
 
@@ -435,12 +436,20 @@ export default app;
 // });
 
 // // Start the server
-// const server = app.listen(PORT, () => {
-//   console.log(`🚀 Server running on port ${PORT}`);
-//   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-//   console.log(`🔗 API URL: http://localhost:${PORT}/api`);
-//   console.log(`❤️  Health check: http://localhost:${PORT}/api/health`);
-//   connectDB();
-// });
+async function startServer() {
+  try {
+    await runMigrations();
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔗 API URL: http://localhost:${PORT}/api`);
+      console.log(`❤️ Health check: http://localhost:${PORT}/api/health`);
+      connectDB();
+    });
+  } catch (error) {
+    console.error('Migration failed; server was not started:', error.message);
+    process.exit(1);
+  }
+}
 
-// export default app;
+startServer();
