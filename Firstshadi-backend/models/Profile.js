@@ -1,5 +1,18 @@
 import { pool } from '../config/database.js';
 
+function parseJsonArray(value) {
+  if (Array.isArray(value)) return value;
+  if (Buffer.isBuffer(value)) value = value.toString('utf8');
+  if (typeof value !== 'string' || value.trim() === '') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    // Older production rows may contain empty or malformed JSON text.
+    return [];
+  }
+}
+
 export class Profile {
   static async create(profileData) {
     const {
@@ -61,12 +74,8 @@ export class Profile {
     if (rows.length === 0) return null;
     
     const profile = rows[0];
-    if (profile.profile_photos) {
-      profile.profile_photos = JSON.parse(profile.profile_photos);
-    }
-    if (profile.family_members) {
-      profile.family_members = JSON.parse(profile.family_members);
-    }
+    profile.profile_photos = parseJsonArray(profile.profile_photos);
+    profile.family_members = parseJsonArray(profile.family_members);
     
     return profile;
   }
@@ -87,12 +96,8 @@ export class Profile {
     if (rows.length === 0) return null;
     
     const profile = rows[0];
-    if (profile.profile_photos) {
-      profile.profile_photos = JSON.parse(profile.profile_photos);
-    }
-    if (profile.family_members) {
-      profile.family_members = JSON.parse(profile.family_members);
-    }
+    profile.profile_photos = parseJsonArray(profile.profile_photos);
+    profile.family_members = parseJsonArray(profile.family_members);
     
     return profile;
   }
