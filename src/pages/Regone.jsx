@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motherTongues } from '../data/motherTongues';
 
 const Regone = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,6 @@ const Regone = () => {
     height: '',
   });
 
-  const motherTongues = ['Hindi', 'English', 'Bengali', 'Tamil', 'Telugu', 'Punjabi'];
   const religions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhist', 'Jain'];
   const castes = ['Brahmin', 'Rajput', 'Yadav', 'SC', 'ST', 'OBC', 'Other'];
   const maritalStatuses = ['Never Married', 'Divorced', 'Widowed', 'Separated'];

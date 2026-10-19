@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motherTongues } from '../data/motherTongues';
 
 // ============================================================
 //  DATA
@@ -11,11 +12,7 @@ const religionOptions = [
   "Parsi", "Jewish", "Spiritual", "Other"
 ];
 
-const motherTongueOptions = [
-  "Hindi", "English", "Bengali", "Marathi", "Punjabi", "Tamil", "Telugu",
-  "Gujarati", "Kannada", "Malayalam", "Odia", "Urdu", "Assamese",
-  "Bhojpuri", "Haryanvi", "Rajasthani", "Other"
-];
+const motherTongueOptions = motherTongues;
 
 const profileForOptions = ['Myself', 'My Son', 'My Daughter', 'My Brother', 'My Sister', 'My Friend', 'My Relative'];
 
