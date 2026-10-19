@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import { profileService } from '../services/profileService';
 
+/* ------------------------------ ICONS ------------------------------ */
+
 const EditIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
@@ -34,8 +36,53 @@ const CancelIcon = () => (
   </svg>
 );
 
+/* ------------------------------ HELPERS ------------------------------ */
+
 const prettify = (str) =>
-  str.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()).replace('Dob', 'Date of Birth');
+  str
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/\bDob\b/, 'Date of Birth');
+
+const HIDDEN_KEYS = ['profile_photos', 'family_members', 'id', 'user_id', 'created_at', 'updated_at'];
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}(T.*)?$/;
+
+const formatValue = (value) => {
+  if (value === '' || value === null || value === undefined) return '—';
+  if (typeof value === 'string' && ISO_DATE.test(value)) {
+    const d = new Date(value);
+    if (!isNaN(d)) {
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+  }
+  return String(value);
+};
+
+const GROUPS = [
+  { title: 'Family Details', icon: '🏠', test: /family|father|mother(?! tongue)|brother|sister|sibling/i },
+  { title: 'Religion & Community', icon: '🕉️', test: /religion|community|caste|gotra|manglik|rashi|horoscope/i },
+  { title: 'Education & Career', icon: '🎓', test: /educat|qualif|occupation|profession|job|company|employ|income|salary|work/i },
+  { title: 'Location', icon: '📍', test: /city|state|country|address|pincode|zip|location|residen/i },
+  { title: 'Lifestyle & Interests', icon: '✨', test: /diet|smok|drink|hobb|interest|food|lifestyle/i },
+  { title: 'Personal Details', icon: '👤', test: /first name|last name|date of birth|\bage\b|gender|marital|height|weight|complexion|body|blood|disab|tongue|language/i },
+];
+
+const groupRows = (rows) => {
+  const buckets = GROUPS.map((g) => ({ ...g, items: [] }));
+  const other = { title: 'More Details', icon: '📋', items: [] };
+  rows.forEach((row) => {
+    if (row.value === null || row.value === undefined) return;
+    const bucket = buckets.find((b) => b.test.test(row.label)) || other;
+    bucket.items.push(row);
+  });
+  // Personal pehle dikhe
+  const ordered = [buckets[5], buckets[1], buckets[2], buckets[3], buckets[0], buckets[4], other];
+  return ordered.filter((b) => b.items.length > 0);
+};
 
 const flatten = (data, prefix = '', path = []) => {
   const rows = [];
@@ -52,12 +99,14 @@ const flatten = (data, prefix = '', path = []) => {
     return rows;
   }
   Object.entries(data).forEach(([k, v]) => {
-    if (k !== 'profile_photos' && k !== 'family_members') {
+    if (!HIDDEN_KEYS.includes(k)) {
       rows.push(...flatten(v, `${prefix} ${prettify(k)}`, [...path, k]));
     }
   });
   return rows;
 };
+
+/* ------------------------------ COMPONENT ------------------------------ */
 
 const Myprofile = () => {
   const fileInputRef = useRef(null);
@@ -176,82 +225,143 @@ const Myprofile = () => {
 
   const displayProfile = isEditing ? editedProfile : profile;
   const rows = flatten(displayProfile);
+  const sections = groupRows(rows);
   const profileName = [displayProfile.first_name, displayProfile.last_name].filter(Boolean).join(' ') || 'My Profile';
+
+  const filled = rows.filter((r) => r.value !== null && r.value !== undefined && String(r.value).trim() !== '').length;
+  const completeness = rows.length ? Math.round((filled / rows.length) * 100) : 0;
+
+  const chips = [
+    displayProfile.age ? `${displayProfile.age} yrs` : null,
+    displayProfile.religion,
+    displayProfile.city,
+  ].filter(Boolean);
 
   return (
     <div>
-      <div className="min-h-screen bg-slate-50 font-sans flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 transition-all">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
-            <div className="relative mb-4 sm:mb-0 sm:mr-6">
-              <img
-                src={displayProfile.profile_photos?.[0] || 'https://placehold.co/200x200/e2e8f0/475569?text=Photo'}
-                alt="Profile"
-                className="w-32 h-32 object-cover rounded-full border-4 border-white shadow-md"
-              />
-              {isEditing && (
-                <button
-                  onClick={handleImageClick}
-                  className="absolute bottom-0 right-0 bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center border-4 border-white hover:bg-indigo-700 transition"
-                  title="Change profile image"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h3"/><path d="m17.5 9.5-2.2-2.2c-.4-.4-1-.4-1.4 0L5.5 15.7c-.2.2-.3.4-.3.7v2.8c0 .3.3.5.5.5h2.8c.3 0 .5-.1.7-.3l8.4-8.4c.4-.4.4-1 0-1.4Z"/></svg>
-                </button>
-              )}
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-pink-50/40 font-sans px-4 pb-16">
+        <div className="mx-auto w-full max-w-4xl pt-8">
+          {/* HERO CARD */}
+          <div className="bg-white rounded-3xl shadow-xl shadow-indigo-100/60 overflow-hidden">
+            <div className="h-40 bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-500 relative">
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,white,transparent_40%),radial-gradient(circle_at_80%_60%,white,transparent_35%)]" />
             </div>
-            <div className="flex-grow">
-              <h1 className="text-3xl font-bold text-slate-800">{profileName}</h1>
-              <p className="text-slate-500 mt-1">{displayProfile.email || ''}</p>
-              <div className="mt-4 flex justify-center sm:justify-start space-x-2">
-                {isEditing ? (
-                  <>
-                    <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition disabled:opacity-50">
-                      <SaveIcon /> {saving ? 'Saving...' : 'Save'}
+
+            <div className="px-6 sm:px-10 pb-8">
+              <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-16">
+                <div className="relative self-center sm:self-auto">
+                  <img
+                    src={displayProfile.profile_photos?.[0] || 'https://placehold.co/200x200/e2e8f0/475569?text=Photo'}
+                    alt="Profile"
+                    className="w-32 h-32 sm:w-36 sm:h-36 object-cover rounded-full ring-4 ring-white shadow-lg bg-white"
+                  />
+                  {isEditing && (
+                    <button
+                      onClick={handleImageClick}
+                      className="absolute bottom-1 right-1 bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center ring-4 ring-white hover:bg-indigo-700 transition"
+                      title="Change profile image"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                     </button>
-                    <button onClick={handleCancel} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-500 text-white text-sm font-semibold hover:bg-slate-600 transition">
-                      <CancelIcon /> Cancel
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={handleEdit} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition">
-                      <EditIcon /> Edit Profile
-                    </button>
-                    <button onClick={handleDelete} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-transparent text-slate-500 text-sm font-semibold hover:bg-red-50 hover:text-red-600 transition">
-                      <DeleteIcon />
-                    </button>
-                  </>
-                )}
+                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                </div>
+
+                <div className="flex-grow text-center sm:text-left sm:pb-2">
+                  <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">{profileName}</h1>
+                  {displayProfile.email && <p className="text-slate-500 mt-1">{displayProfile.email}</p>}
+                  {chips.length > 0 && (
+                    <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
+                      {chips.map((c, i) => (
+                        <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-center gap-2 sm:pb-2">
+                  {isEditing ? (
+                    <>
+                      <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold shadow-md shadow-emerald-200 hover:bg-emerald-600 transition disabled:opacity-50">
+                        <SaveIcon /> {saving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button onClick={handleCancel} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition">
+                        <CancelIcon /> Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={handleEdit} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-md shadow-indigo-200 hover:shadow-lg hover:-translate-y-0.5 transition">
+                        <EditIcon /> Edit Profile
+                      </button>
+                      <button onClick={handleDelete} title="Delete profile" className="flex items-center px-3 py-2.5 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition">
+                        <DeleteIcon />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* COMPLETENESS */}
+              <div className="mt-8">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="font-semibold text-slate-700">Profile completeness</span>
+                  <span className="font-bold text-indigo-600">{completeness}%</span>
+                </div>
+                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500 transition-all duration-700"
+                    style={{ width: `${completeness}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          <hr className="my-8 border-slate-200" />
+          {/* SECTIONS */}
+          <div className="mt-6 space-y-6">
+            {sections.map((section) => (
+              <div key={section.title} className="bg-white rounded-3xl shadow-lg shadow-slate-200/60 p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-lg">{section.icon}</span>
+                  <h2 className="text-lg font-bold text-slate-800">{section.title}</h2>
+                </div>
 
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-slate-700 mb-4">Profile Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
-              {rows.map(({ label, value, path }, idx) =>
-                value !== null && value !== undefined ? (
-                  <div key={idx} className="flex flex-col">
-                    <span className="text-sm font-medium text-slate-500 mb-1">{label}</span>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={String(value)}
-                        onChange={(e) => handleChange(path, e.target.value)}
-                        className="w-full p-2 border border-slate-300 rounded-md text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                      />
-                    ) : (
-                      <span className="text-slate-800 font-semibold text-base break-words">
-                        {String(value)}
-                      </span>
-                    )}
-                  </div>
-                ) : null
-              )}
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {section.items.map(({ label, value, path }, idx) => {
+                    const isDate = /date of birth/i.test(label);
+                    return (
+                      <div
+                        key={idx}
+                        className={`rounded-2xl p-4 border transition ${
+                          isEditing
+                            ? 'bg-white border-slate-200'
+                            : 'bg-slate-50/70 border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40'
+                        }`}
+                      >
+                        <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                          {label}
+                        </span>
+                        {isEditing ? (
+                          <input
+                            type={isDate ? 'date' : 'text'}
+                            value={isDate ? String(value).slice(0, 10) : String(value)}
+                            onChange={(e) => handleChange(path, e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                          />
+                        ) : (
+                          <span className="block text-slate-800 font-semibold break-words">
+                            {formatValue(value)}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
