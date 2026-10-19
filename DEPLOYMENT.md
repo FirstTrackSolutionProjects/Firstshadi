@@ -28,13 +28,15 @@ Deploy the frontend as a **Static Site** with:
 - Build environment variable: `VITE_API_URL=https://<backend-service>.onrender.com/api`
 - Rewrite rule: `/*` to `/index.html` with status `200` for React Router routes.
 
-After the frontend has a URL, set the backend's `FRONTEND_URL` to that exact origin (scheme and hostname, no path), then redeploy the backend.
+After the frontend has a URL, set the backend's `FRONTEND_URL`/`FRONTEND_URLS` to every exact frontend origin (scheme and hostname, no path), then redeploy the backend. For the current Netlify domains use `https://firstshadi.netlify.app,https://firstmarriage.netlify.app`.
+
+For Google sign-in, create a Google OAuth Web client ID. Add each deployed frontend hostname under Authorized JavaScript origins. Set `GOOGLE_CLIENT_ID` in the backend environment and `VITE_GOOGLE_CLIENT_ID` in the Netlify build environment, then redeploy the backend and rebuild the frontend. Google sign-in authenticates existing accounts whose email matches the verified Google email; users without an account must register first.
 
 ## Hostinger
 
 Use a plan that supports Node.js applications, or a VPS. Deploy the backend from `Firstshadi-backend` with `npm install` and set the environment variables from `Firstshadi-backend/.env.example` in the app settings. Keep the entry file as `server.js`; it runs pending migrations automatically before the server starts. Allow the app's host to connect to the Hostinger MySQL database. Profile photo uploads are stored in the configured S3 bucket.
 
-Build the frontend from the repository root with `npm ci && npm run build`, set `VITE_API_URL` to the backend's HTTPS API URL ending in `/api`, and publish the contents of `dist`. Set backend `FRONTEND_URL` to the frontend's exact HTTPS origin.
+Build the frontend from the repository root with `npm ci && npm run build`, set `VITE_API_URL` to the backend's HTTPS API URL ending in `/api`, and publish the contents of `dist`. Set backend `FRONTEND_URL`/`FRONTEND_URLS` to every frontend's exact HTTPS origin. For the current Netlify domains use `https://firstshadi.netlify.app,https://firstmarriage.netlify.app`.
 
 ## Required backend environment variables
 
@@ -42,10 +44,11 @@ Build the frontend from the repository root with `npm ci && npm run build`, set 
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 - `JWT_SECRET` (a unique, long random value)
 - `FRONTEND_URL` (or comma-separated `FRONTEND_URLS`)
+- `GOOGLE_CLIENT_ID` for Google sign-in
 - `UPLOAD_DIR` pointing at persistent storage
 - `AWS_REGION`, `AWS_S3_BUCKET`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` for profile photo storage
 
-The frontend build requires `VITE_API_URL`. Changing it after a static build requires rebuilding the frontend.
+The frontend build requires `VITE_API_URL` and `VITE_GOOGLE_CLIENT_ID`. Changing either after a static build requires rebuilding the frontend.
 
 ## AWS S3 profile photo storage
 

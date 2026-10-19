@@ -61,7 +61,7 @@ const Car = () => {
     const [formData, setFormData] = useState({
         country: '', state: '', city: '', currentAddress: '', permanentAddress: '', mobileNo: '', dob: '', birthPlace: '',
         degree: '', employedIn: '', occupation: '', income: '',
-        height: '', weight: '', faceColor: '', bodyShape: '', rashifal: '', bloodGroup: '', manglik: '',
+        height: '', weight: '', faceColor: '', bodyShape: '', rashifal: '', bloodGroup: '', manglik: '', diet: '',
         photos: [null], hobby: '', about: '', favoriteColor: '', favoriteSong: '', favoriteMovies: '',
     });
     const [errors, setErrors] = useState({});
@@ -78,7 +78,7 @@ const Car = () => {
         },
         3: {
             title: 'Personal Details',
-            fields: ['height', 'weight', 'faceColor', 'bodyShape', 'rashifal', 'bloodGroup', 'manglik']
+            fields: ['height', 'weight', 'faceColor', 'bodyShape', 'rashifal', 'bloodGroup', 'manglik', 'diet']
         },
         4: {
             title: 'About & Photos',
@@ -178,6 +178,7 @@ const Car = () => {
         bodyShape: ['Slim', 'Athletic', 'Average', 'Heavy', 'Curvy', 'Muscular'],
         rashifal: ['Mesh (Aries)', 'Vrishabh (Taurus)', 'Mithun (Gemini)', 'Karka (Cancer)', 'Simha (Leo)','Kanya (Virgo)', 'Tula (Libra)', 'Vrischik (Scorpio)', 'Dhanu (Sagittarius)','Makar (Capricorn)', 'Kumbh (Aquarius)', 'Meen (Pisces)'],
         bloodGroup: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
+        diet: ['Veg', 'Non Veg'],
     };
 
     /* ----------- UI Rendering ----------- */
@@ -248,6 +249,7 @@ const Car = () => {
                                 <FormField icon={<FiUser />} name="bodyShape" label="Body Shape" value={formData.bodyShape} onChange={handleInputChange} error={errors.bodyShape} type="select" options={options.bodyShape} />
                                 <FormField icon={<FiUser />} name="rashifal" label="Rashifal (Zodiac)" value={formData.rashifal} onChange={handleInputChange} error={errors.rashifal} type="select" options={options.rashifal} />
                                 <FormField icon={<FiHeart />} name="bloodGroup" label="Blood Group" value={formData.bloodGroup} onChange={handleInputChange} error={errors.bloodGroup} type="select" options={options.bloodGroup} />
+                                <FormField icon={<FiHeart />} name="diet" label="Diet" value={formData.diet} onChange={handleInputChange} error={errors.diet} type="select" options={options.diet} />
                                 <div>
                                     <label className="block text-sm font-medium text-red-900 mb-1">Manglik <span className="text-pink-500">*</span></label>
                                     <div className="flex gap-4 mt-2 p-2 bg-slate-50 border border-slate-300 rounded-md">

@@ -87,6 +87,15 @@ export const authService = {
     return response;
   },
 
+  async googleLogin(credential) {
+    const response = await api.post('/auth/google', { credential });
+    if (response.success && response.data?.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response;
+  },
+
   // Send OTP — type is 'email_verification' | 'phone_verification' | 'reset_password'
   async sendOTP({ email, phone, type }) {
     return await api.post('/auth/send-otp', { email, phone, type });

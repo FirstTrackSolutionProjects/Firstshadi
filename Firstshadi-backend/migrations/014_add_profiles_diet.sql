@@ -1,0 +1,1 @@
+ALTER TABLE profiles ADD COLUMN diet VARCHAR(20) NULL AFTER caste;

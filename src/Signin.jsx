@@ -91,7 +91,7 @@
 // export default Signin;
 
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Footer from './components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -103,12 +103,59 @@ const Signin = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
+  const googleButtonRef = useRef(null);
+  const [googleError, setGoogleError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const handleGoogleSignIn = () => {
-    alert('Google Sign-In triggered');
-  };
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId || !googleButtonRef.current) return;
+
+    const renderGoogleButton = () => {
+      if (!window.google?.accounts?.id || !googleButtonRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async ({ credential }) => {
+          setGoogleError('');
+          setGoogleLoading(true);
+          try {
+            const result = await googleLogin(credential);
+            const signedInUser = result.data?.user;
+            navigate(signedInUser?.is_admin ? '/admin' : '/');
+          } catch (err) {
+            setGoogleError(err.message || 'Google sign-in failed');
+          } finally {
+            setGoogleLoading(false);
+          }
+        },
+      });
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rect',
+        width: Math.min(350, googleButtonRef.current.clientWidth || 350),
+      });
+    };
+
+    const existingScript = document.querySelector('script[data-google-identity]');
+    if (window.google?.accounts?.id) {
+      renderGoogleButton();
+    } else if (!existingScript) {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.dataset.googleIdentity = 'true';
+      script.onload = renderGoogleButton;
+      document.head.appendChild(script);
+    } else {
+      existingScript.addEventListener('load', renderGoogleButton, { once: true });
+    }
+  }, [googleLogin, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -187,14 +234,13 @@ const Signin = () => {
             </button>
           </form>
 
-          <div className="mt-4">
-            <button
-              onClick={handleGoogleSignIn}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-md hover:bg-gray-100 transition"
-            >
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-              <span className="text-sm text-gray-700">Sign in with Google</span>
-            </button>
+          <div className="mt-4 flex flex-col items-center gap-2">
+            {googleLoading ? <p className="text-sm text-gray-600">Signing in with Google…</p> : null}
+            {googleError ? <p className="w-full rounded bg-red-100 p-2 text-sm text-red-700">{googleError}</p> : null}
+            {!import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+              <p className="w-full rounded bg-yellow-50 p-2 text-sm text-yellow-800">Google sign-in setup is incomplete.</p>
+            ) : null}
+            <div ref={googleButtonRef} className="min-h-10" />
           </div>
 
           <p className="text-center text-sm mt-4">

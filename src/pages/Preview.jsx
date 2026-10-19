@@ -75,6 +75,7 @@ const Preview = () => {
         dob: s.dob || s.dateOfBirth || null,
         religion: s.religion || null,
         community: s.community || null,
+        diet: s.diet || null,
         caste: s.caste || null,
         mother_tongue: s.motherTongue || null,
         marital_status: s.maritalStatus || 'Never Married',

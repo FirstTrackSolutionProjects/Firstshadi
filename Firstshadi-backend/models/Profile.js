@@ -16,7 +16,7 @@ function parseJsonArray(value) {
 export class Profile {
   static async create(profileData) {
     const {
-      user_id, first_name, last_name, dob, age, religion, community, caste,
+      user_id, first_name, last_name, dob, age, religion, community, caste, diet,
       mother_tongue, marital_status, height, weight, body_shape, face_color,
       blood_group, zodiac, manglik, country, state, city, current_address,
       permanent_address, birth_place, education, employed_in, occupation,
@@ -38,15 +38,15 @@ export class Profile {
 
     const [result] = await pool.query(
       `INSERT INTO profiles (
-        user_id, first_name, last_name, dob, age, religion, community, caste,
+        user_id, first_name, last_name, dob, age, religion, community, caste, diet,
         mother_tongue, marital_status, height, weight, body_shape, face_color,
         blood_group, zodiac, manglik, country, state, city, current_address,
         permanent_address, birth_place, education, employed_in, occupation,
         annual_income, hobbies, about_me, favorite_color, favorite_song,
         favorite_movies, profile_photos, looking_for
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        user_id, first_name, last_name, dob, calculatedAge, religion, community, caste,
+        user_id, first_name, last_name, dob, calculatedAge, religion, community, caste, diet,
         mother_tongue, marital_status, height, weight, body_shape, face_color,
         blood_group, zodiac, manglik, country, state, city, current_address,
         permanent_address, birth_place, education, employed_in, occupation,
@@ -107,7 +107,7 @@ export class Profile {
     const values = [];
 
     const allowedFields = [
-      'first_name', 'last_name', 'dob', 'age', 'religion', 'community', 'caste',
+      'first_name', 'last_name', 'dob', 'age', 'religion', 'community', 'caste', 'diet',
       'mother_tongue', 'marital_status', 'height', 'weight', 'body_shape', 'face_color',
       'blood_group', 'zodiac', 'manglik', 'country', 'state', 'city', 'current_address',
       'permanent_address', 'birth_place', 'education', 'employed_in', 'occupation',

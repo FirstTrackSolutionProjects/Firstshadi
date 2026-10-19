@@ -430,6 +430,7 @@ import User from '../models/User.js';
 import Profile from '../models/Profile.js';
 import { generateToken, verifyToken } from '../config/auth.js';
 import { sendEmailOTP, sendPhoneOTP, verifyOTP as verifyOTPHelper } from '../utils/helpers.js';
+import { verifyGoogleCredential } from '../utils/googleCredential.js';
 
 const generateOTP = () => {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -557,6 +558,45 @@ export const login = async (req, res) => {
       success: false,
       message: 'Login failed. Please try again.'
     });
+  }
+};
+
+// Sign in an existing account with a verified Google identity.
+export const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ success: false, message: 'Google credential is required' });
+
+    const claims = await verifyGoogleCredential(credential);
+    const user = await User.findByEmail(claims.email.toLowerCase());
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account exists for this Google email. Register first, then use Google sign-in.' });
+    }
+
+    if (!user.is_verified) await User.update(user.id, { is_verified: true });
+    const token = generateToken(user.id, user.email);
+    const profile = await Profile.findByUserId(user.id);
+    return res.status(200).json({
+      success: true,
+      message: 'Google sign-in successful',
+      data: {
+        user: {
+          id: user.uuid,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          is_verified: true,
+          is_premium: user.is_premium,
+          premium_expiry: user.premium_expiry,
+          is_admin: !!user.is_admin,
+          has_profile: !!profile,
+        },
+        token,
+      },
+    });
+  } catch (error) {
+    console.error('Google login error:', error.message);
+    return res.status(401).json({ success: false, message: 'Google sign-in could not be verified. Please try again.' });
   }
 };
 

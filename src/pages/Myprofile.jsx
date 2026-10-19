@@ -234,6 +234,7 @@ const Myprofile = () => {
   const chips = [
     displayProfile.age ? `${displayProfile.age} yrs` : null,
     displayProfile.religion,
+    displayProfile.community,
     displayProfile.city,
   ].filter(Boolean);
 
@@ -270,13 +271,19 @@ const Myprofile = () => {
                 <div className="flex-grow text-center sm:text-left sm:pb-2">
                   <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">{profileName}</h1>
                   {displayProfile.email && <p className="text-slate-500 mt-1">{displayProfile.email}</p>}
-                  {chips.length > 0 && (
+                  {(chips.length > 0 || displayProfile.diet) && (
                     <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
                       {chips.map((c, i) => (
                         <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
                           {c}
                         </span>
                       ))}
+                      {displayProfile.diet && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">
+                          <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${displayProfile.diet.toLowerCase().replace(/\s+/g, '') === 'veg' ? 'bg-green-600' : 'bg-red-600'}`} />
+                          {displayProfile.diet}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -332,6 +339,7 @@ const Myprofile = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {section.items.map(({ label, value, path }, idx) => {
                     const isDate = /date of birth/i.test(label);
+                    const isDiet = path[path.length - 1] === 'diet';
                     return (
                       <div
                         key={idx}
@@ -344,7 +352,11 @@ const Myprofile = () => {
                         <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
                           {label}
                         </span>
-                        {isEditing ? (
+                        {isEditing ? isDiet ? (
+                          <select value={value || ''} onChange={(e) => handleChange(path, e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
+                            <option value="">Select diet</option><option value="Veg">Veg</option><option value="Non Veg">Non Veg</option>
+                          </select>
+                        ) : (
                           <input
                             type={isDate ? 'date' : 'text'}
                             value={isDate ? String(value).slice(0, 10) : String(value)}

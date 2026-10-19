@@ -2,6 +2,7 @@ import express from 'express';
 import {
   register,
   login,
+  googleLogin,
   sendOTP,
   verifyOTP,
   getCurrentUser,
@@ -17,6 +18,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/google', googleLogin);
 // router.post('/send-otp', sendOTP);
 // router.post('/verify-otp', verifyOTP);
 router.post('/forgot-password', forgotPassword);

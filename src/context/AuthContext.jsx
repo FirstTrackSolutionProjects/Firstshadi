@@ -102,7 +102,7 @@
 
 
 // src/context/AuthContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { authService } from '../services/authService';
 // import { profileService } from '../services/profileService'; // unused here
 
@@ -179,6 +179,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = useCallback(async (credential) => {
+    setError(null);
+    const response = await authService.googleLogin(credential);
+    if (response.success) setUser(response.data.user);
+    return response;
+  }, []);
+
   const register = async (userData) => {
     try {
       setError(null);
@@ -205,6 +212,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    googleLogin,
     register,
     logout,
     isAuthenticated: !!user,

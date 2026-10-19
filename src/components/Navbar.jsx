@@ -70,7 +70,7 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-6 text-slate-700 font-medium -translate-y-3">
-            <Link to="/" className="hover:text-orange-500">Home</Link>
+            <Link to="/" className="hover:text-orange-500">{isAuthenticated ? 'Dashboard' : 'Home'}</Link>
             <Link to="/about" className="hover:text-orange-500">About Us</Link>
             {isAuthenticated && <Link to="/mymatch" className="hover:text-orange-500">My Matches</Link>}
             {isAuthenticated && <Link to="/myprofile" className="hover:text-orange-500">My Profile</Link>}
@@ -128,7 +128,7 @@ const Navbar = () => {
         >
           <div className="flex flex-col items-start p-6 space-y-4 text-gray-800 font-medium">
             <button onClick={toggleMenu} className="self-end text-gray-600"><X className="h-6 w-6" /></button>
-            <Link to="/" onClick={toggleMenu}>🏠 Home</Link>
+            <Link to="/" onClick={toggleMenu}>{isAuthenticated ? '📊 Dashboard' : '🏠 Home'}</Link>
             <Link to="/about" onClick={toggleMenu}>🧑‍💼 About Us</Link>
             {isAuthenticated && <Link to="/mymatch" onClick={toggleMenu}>❤️ My Matches</Link>}
             {isAuthenticated && <Link to="/myprofile" onClick={toggleMenu}>🧑‍💼 My Profile</Link>}
