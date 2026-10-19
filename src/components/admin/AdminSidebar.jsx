@@ -53,7 +53,9 @@ const AdminSidebar = ({ onNavigate, onLogout, onClose, badges = {} }) => {
       <nav className="relative flex-1 px-3 py-4 overflow-y-auto" aria-label="Admin navigation">
         <p className="px-3 mb-2 text-xs font-semibold text-slate-500">Menu</p>
         <div className="space-y-1">
-          {navItems.map(({ to, label, icon: Icon, end }) => {
+          {navItems.map((item) => {
+            const { to, label, end } = item;
+            const Icon = item.icon;
             const count = badges[to] || 0;
             return (
               <NavLink

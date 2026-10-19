@@ -92,15 +92,15 @@ const AdminLayout = ({ children }) => {
   const totalPending = counts.reports + counts.contacts;
 
   return (
-    <div className="min-h-screen flex bg-slate-100">
-      {/* Desktop sidebar (sticky, so Logout is always visible) */}
-      <div className="hidden md:block sticky top-0 h-screen flex-shrink-0">
+    <div className="min-h-screen bg-slate-100">
+      {/* Desktop sidebar (fixed, so it never scrolls with the page) */}
+      <div className="hidden md:block fixed inset-y-0 left-0 w-64 z-40">
         <AdminSidebar onNavigate={handleNavigate} onLogout={handleLogout} badges={badges} />
       </div>
 
       {/* Mobile drawer */}
       <div
-        className={`fixed inset-0 z-40 md:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}
+        className={`fixed inset-0 z-50 md:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}
         aria-hidden={!mobileOpen}
       >
         <div
@@ -124,9 +124,9 @@ const AdminLayout = ({ children }) => {
       </div>
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
-        <header className="bg-white/85 backdrop-blur border-b border-slate-200 px-4 md:px-8 py-3.5 flex items-center justify-between sticky top-0 z-30">
+      <div className="md:pl-64 min-h-screen flex flex-col min-w-0">
+        {/* Topbar (fixed) */}
+        <header className="fixed top-0 right-0 left-0 md:left-64 z-30 h-[72px] bg-white/85 backdrop-blur border-b border-slate-200 px-4 md:px-8 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileOpen(true)}
@@ -230,8 +230,8 @@ const AdminLayout = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-8">
-          <div className="max-w-7xl mx-auto w-full">{children}</div>
+        <main className="flex-1 pt-[72px]">
+          <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
         </main>
       </div>
     </div>
