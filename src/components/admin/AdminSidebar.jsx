@@ -10,6 +10,7 @@ import {
   BookHeart,
   LogOut,
   Home,
+  X,
 } from 'lucide-react';
 
 const navItems = [
@@ -21,56 +22,103 @@ const navItems = [
   { to: '/admin/stories',   label: 'Stories',   icon: BookHeart },
 ];
 
-const AdminSidebar = ({ onNavigate, onLogout }) => {
+// badges: { '/admin/reports': 3, '/admin/contacts': 5 }
+const AdminSidebar = ({ onNavigate, onLogout, onClose, badges = {} }) => {
   return (
-    <aside className="w-64 bg-slate-900 text-slate-100 flex-shrink-0 flex flex-col">
+    <aside className="relative w-64 h-full bg-slate-900 text-slate-100 flex-shrink-0 flex flex-col overflow-hidden">
+      {/* soft glow */}
+      <div className="pointer-events-none absolute -top-24 -left-16 h-56 w-56 rounded-full bg-rose-600/20 blur-3xl" />
+
       {/* Brand */}
-      <div className="px-6 py-5 border-b border-slate-800 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center font-bold text-white">
+      <div className="relative px-5 py-5 border-b border-slate-800 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center font-bold text-white shadow-lg shadow-rose-900/40">
           F
         </div>
-        <div>
-          <p className="text-sm font-bold leading-tight">First Marriage</p>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400">Owner Panel</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold leading-tight truncate">First Marriage</p>
+          <p className="text-xs text-slate-400 leading-tight mt-0.5">Owner Panel</p>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Close menu"
+            className="md:hidden p-2 -mr-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {navItems.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-              }`
-            }
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </NavLink>
-        ))}
+      <nav className="relative flex-1 px-3 py-4 overflow-y-auto" aria-label="Admin navigation">
+        <p className="px-3 mb-2 text-xs font-semibold text-slate-500">Menu</p>
+        <div className="space-y-1">
+          {navItems.map(({ to, label, icon: Icon, end }) => {
+            const count = badges[to] || 0;
+            return (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  `group relative flex items-center gap-3 pl-3 pr-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md shadow-rose-900/30'
+                      : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute -left-3 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-rose-400" />
+                    )}
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${
+                        isActive ? 'bg-white/20' : 'bg-slate-800 group-hover:bg-slate-700'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <span className="flex-1">{label}</span>
+                    {count > 0 && (
+                      <span
+                        className={`min-w-[22px] h-[22px] px-1.5 rounded-full text-xs font-bold flex items-center justify-center ${
+                          isActive ? 'bg-white text-rose-600' : 'bg-rose-600 text-white'
+                        }`}
+                      >
+                        {count > 99 ? '99+' : count}
+                      </span>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Bottom */}
-      <div className="p-3 border-t border-slate-800 space-y-1">
+      <div className="relative p-3 border-t border-slate-800 space-y-1">
         <NavLink
           to="/"
           onClick={onNavigate}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white transition"
         >
-          <Home className="w-4 h-4" /> View Public Site
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 group-hover:bg-slate-700 transition">
+            <Home className="w-4 h-4" />
+          </span>
+          View Public Site
         </NavLink>
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-red-300 hover:bg-red-900/40 hover:text-white"
+          className="group w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-red-300 hover:bg-red-900/40 hover:text-white transition"
         >
-          <LogOut className="w-4 h-4" /> Logout
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-900/30 group-hover:bg-red-800/60 transition">
+            <LogOut className="w-4 h-4" />
+          </span>
+          Logout
         </button>
       </div>
     </aside>
