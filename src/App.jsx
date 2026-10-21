@@ -1,9 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import './App.css';
 
 // Pages
-import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Register from './pages/Register';
@@ -125,6 +124,7 @@ function App() {
           {/* ============ PUBLIC / USER ROUTES (with public navbar) ============ */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/register" element={<Register />} />
@@ -144,6 +144,8 @@ function App() {
             <Route path="/boxsc" element={<ProtectedRoute><Boxsc /></ProtectedRoute>} />
             <Route path="/rels" element={<ProtectedRoute><Rels /></ProtectedRoute>} />
             <Route path="/sol" element={<ProtectedRoute><Sol /></ProtectedRoute>} />
+            {/* Filt is a retired page; send old links to the active search page. */}
+            <Route path="/filt" element={<Navigate to="/sol" replace />} />
             <Route path="/car" element={<ProtectedRoute><Car /></ProtectedRoute>} />
             <Route path="/fmprof" element={<ProtectedRoute><Fmprof /></ProtectedRoute>} />
             <Route path="/mymatch" element={<ProtectedRoute><Mymatch /></ProtectedRoute>} />
