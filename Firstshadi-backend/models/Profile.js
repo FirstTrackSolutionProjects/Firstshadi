@@ -250,12 +250,8 @@ export class Profile {
 
     // Process results
     const results = rows.map(row => {
-      if (row.profile_photos) {
-        row.profile_photos = JSON.parse(row.profile_photos);
-      }
-      if (row.family_members) {
-        row.family_members = JSON.parse(row.family_members);
-      }
+      row.profile_photos = parseJsonArray(row.profile_photos);
+      row.family_members = parseJsonArray(row.family_members);
       return row;
     });
 
