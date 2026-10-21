@@ -140,9 +140,12 @@ const Paym = () => {
         @media (prefers-reduced-motion: reduce) { .pm-rise, .pm-rise-2 { animation: none; } }
       `}</style>
 
-      <div className="relative overflow-hidden min-h-screen bg-gray-50 px-4 py-10">
-        <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-yellow-600/10 blur-3xl" />
-        <div className="pointer-events-none absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-red-900/10 blur-3xl" />
+      {/* NOTE: no overflow-hidden on this wrapper, otherwise the sticky order summary stops working */}
+      <div className="relative min-h-screen bg-gray-50 px-4 py-10">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-yellow-600/10 blur-3xl" />
+          <div className="absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-red-900/10 blur-3xl" />
+        </div>
 
         {/* Success toast */}
         {paymentSuccess && (
