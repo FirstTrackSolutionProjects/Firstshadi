@@ -3,6 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { paymentService } from '../services/paymentService';
 import { useAuth } from '../context/AuthContext';
+import {
+  ArrowLeftIcon,
+  CreditCardIcon,
+  BanknotesIcon,
+  GlobeAltIcon,
+  DevicePhoneMobileIcon,
+  UserIcon,
+  CalendarDaysIcon,
+  LockClosedIcon,
+  AtSymbolIcon,
+  ExclamationCircleIcon,
+  CheckCircleIcon,
+} from '@heroicons/react/24/outline';
+
+const inputBase =
+  "w-full border border-yellow-600 rounded-xl bg-white text-black placeholder-yellow-600 " +
+  "py-3.5 pl-11 pr-4 shadow-sm transition duration-200 hover:shadow-md " +
+  "focus:outline-none focus:ring-4 focus:ring-yellow-600/20";
+const labelCls = "block mb-2 text-sm font-semibold text-gray-800";
+const iconCls = "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-yellow-600";
 
 const Paym = () => {
   const navigate = useNavigate();
@@ -76,106 +96,256 @@ const Paym = () => {
     }
   };
 
+  /* ---------- UI-only helpers ---------- */
+  const methods = [
+    { value: 'credit', label: 'Credit Card', icon: CreditCardIcon },
+    { value: 'debit', label: 'Debit Card', icon: BanknotesIcon },
+    { value: 'paypal', label: 'PayPal', icon: GlobeAltIcon },
+    { value: 'upi', label: 'UPI', icon: DevicePhoneMobileIcon },
+  ];
+  const methodLabel = methods.find(m => m.value === paymentMethod)?.label;
+  const disabled = processing || paymentSuccess;
+
   return (
     <div>
-      <div className="min-h-screen bg-gray-100 p-6 relative">
+      <style>{`
+        @keyframes pmRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+        .pm-rise { animation: pmRise .6s ease-out both; }
+        .pm-rise-2 { animation: pmRise .6s .12s ease-out both; }
+        @media (prefers-reduced-motion: reduce) { .pm-rise, .pm-rise-2 { animation: none; } }
+      `}</style>
+
+      <div className="relative overflow-hidden min-h-screen bg-gray-50 px-4 py-10">
+        <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-yellow-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-red-900/10 blur-3xl" />
+
+        {/* Success toast */}
         {paymentSuccess && (
-          <div className="fixed top-6 right-6 bg-green-600 text-white px-6 py-4 rounded shadow-lg z-50">
-            <div className="font-bold text-lg">✅ Payment Successful</div>
-            <div>📦 <b>Plan:</b> {selectedPlan.label}</div>
-            <div>🧾 <b>Order ID:</b> {orderId}</div>
-            <div>💳 <b>Payment ID:</b> {paymentId}</div>
-            <div>💰 <b>Total Paid:</b> ₹{total}</div>
+          <div
+            role="status"
+            className="fixed top-6 right-6 z-50 w-[calc(100%-3rem)] max-w-sm bg-white rounded-2xl shadow-2xl border-l-4 border-red-900 p-5"
+          >
+            <div className="flex items-center gap-2 text-red-800 font-bold text-lg">
+              <CheckCircleIcon className="h-6 w-6" />
+              Payment Successful
+            </div>
+            <dl className="mt-3 space-y-1.5 text-sm text-gray-700">
+              <div className="flex justify-between gap-4"><dt className="font-semibold">Plan</dt><dd>{selectedPlan.label}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="font-semibold">Order ID</dt><dd className="break-all text-right">{orderId}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="font-semibold">Payment ID</dt><dd>{paymentId}</dd></div>
+              <div className="flex justify-between gap-4 border-t border-gray-200 pt-2 mt-2"><dt className="font-semibold">Total Paid</dt><dd className="font-bold text-red-800">₹{total}</dd></div>
+            </dl>
           </div>
         )}
 
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 text-black bg-white px-3 py-1 rounded-full shadow hover:bg-gray-100"
-        >
-          ← Back
-        </button>
+        <div className="relative max-w-6xl mx-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-gray-800 bg-white px-4 py-2 rounded-full shadow hover:shadow-md hover:bg-gray-50 transition focus:outline-none focus:ring-4 focus:ring-yellow-600/20"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back
+          </button>
 
-        <div className="max-w-3xl mx-auto bg-white shadow-md rounded-md mt-10">
-          <div className="bg-black text-white text-center py-2 text-lg font-semibold">
-            Pay Membership
+          {/* Heading */}
+          <div className="pm-rise text-center max-w-2xl mx-auto mt-4 mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-red-700">Pay Membership</h1>
+            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-red-900" />
+            <p className="mt-5 text-lg text-gray-700">
+              Choose a plan and a payment method to unlock your membership.
+            </p>
           </div>
 
-          <div className="p-6">
-            {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>}
+          <div className="pm-rise-2 grid lg:grid-cols-5 gap-8 items-start">
 
-            <h2 className="text-xl font-semibold mb-4">CHOOSE A PAYMENT METHOD *</h2>
-            <div className="flex gap-6 mb-6 flex-col md:flex-row">
-              <label className="flex-1 border rounded-md p-4 cursor-pointer">
-                <input type="radio" name="paymentMethod" value="credit" checked={paymentMethod === 'credit'} onChange={() => setPaymentMethod('credit')} className="mr-2" />
-                <span className="font-medium">Credit Card</span>
-              </label>
-              <label className="flex-1 border rounded-md p-4 cursor-pointer">
-                <input type="radio" name="paymentMethod" value="debit" checked={paymentMethod === 'debit'} onChange={() => setPaymentMethod('debit')} className="mr-2" />
-                <span className="font-medium">Debit Card</span>
-              </label>
-              <label className="flex-1 border rounded-md p-4 cursor-pointer">
-                <input type="radio" name="paymentMethod" value="paypal" checked={paymentMethod === 'paypal'} onChange={() => setPaymentMethod('paypal')} className="mr-2" />
-                <span className="font-medium">PayPal</span>
-              </label>
-              <label className="flex-1 border rounded-md p-4 cursor-pointer">
-                <input type="radio" name="paymentMethod" value="upi" checked={paymentMethod === 'upi'} onChange={() => setPaymentMethod('upi')} className="mr-2" />
-                <span className="font-medium">UPI</span>
-              </label>
-            </div>
+            {/* ---------- Left: choices + details ---------- */}
+            <div className="lg:col-span-3 bg-white rounded-2xl shadow-xl border-t-4 border-red-900 p-8 md:p-10 space-y-10">
 
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">MEMBERSHIP PLAN</h3>
-              <label className="block font-medium mb-1">Select Plan</label>
-              <select value={plan} onChange={(e) => setPlan(e.target.value)} className="border rounded-md p-2 w-full mb-2">
-                {Object.entries(plans).map(([key, val]) => (
-                  <option key={key} value={key}>{val.label} - ₹{val.price}</option>
-                ))}
-              </select>
-              <div className="border rounded-md p-2 mb-1">
-                ₹{selectedPlan.price.toFixed(2)} + 18% GST (₹{gst})
-              </div>
-              <div className="font-bold mt-1">
-                Total <span className="float-right">₹{total}</span>
-              </div>
-            </div>
-
-            {(paymentMethod === 'credit' || paymentMethod === 'debit') && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">
-                  {paymentMethod === 'credit' ? 'CREDIT' : 'DEBIT'} CARD INFORMATION
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input type="text" placeholder="Card Number" className="border p-2 rounded w-full" />
-                  <input type="text" placeholder="Name on Card" className="border p-2 rounded w-full" />
-                  <input type="text" placeholder="Expiry Date (MM/YY)" className="border p-2 rounded w-full" />
-                  <input type="text" placeholder="CVV" className="border p-2 rounded w-full" />
+              {error && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 p-3 rounded-xl bg-red-100 text-red-700 text-sm border border-red-200"
+                >
+                  <ExclamationCircleIcon className="h-5 w-5 shrink-0 mt-px" />
+                  <span>{error}</span>
                 </div>
-              </div>
-            )}
+              )}
 
-            {paymentMethod === 'upi' && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">UPI PAYMENT</h3>
-                <input
-                  type="text"
-                  placeholder="Enter UPI ID (e.g., name@upi)"
-                  value={upiId}
-                  onChange={(e) => setUpiId(e.target.value)}
-                  className="border p-2 rounded w-full"
-                />
-              </div>
-            )}
+              {/* Payment method */}
+              <section>
+                <h2 className="text-xl font-bold text-gray-900">Choose a payment method</h2>
+                <p className="mt-1 mb-5 text-gray-600">Select how you would like to pay.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {methods.map(({ value, label, icon: Icon }) => (
+                    <label key={value} className="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={value}
+                        checked={paymentMethod === value}
+                        onChange={() => setPaymentMethod(value)}
+                        className="peer sr-only"
+                      />
+                      <div className="flex flex-col items-center gap-2 rounded-xl border border-yellow-600 bg-white p-4 text-center text-gray-800 shadow-sm transition
+                                      hover:shadow-md
+                                      peer-focus-visible:ring-4 peer-focus-visible:ring-yellow-600/30
+                                      peer-checked:bg-red-900 peer-checked:text-white peer-checked:border-red-900 peer-checked:shadow-lg">
+                        <Icon className="h-7 w-7" />
+                        <span className="text-sm font-semibold">{label}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </section>
 
-            <button
-              onClick={handlePayment}
-              disabled={processing || paymentSuccess}
-              className={`bg-black text-white px-6 py-2 rounded transition ${
-                (processing || paymentSuccess) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800'
-              }`}
-            >
-              {processing ? 'Processing...' : paymentSuccess ? 'Paid' : 'Pay Now'}
-            </button>
+              {/* Membership plan */}
+              <section>
+                <h2 className="text-xl font-bold text-gray-900">Membership plan</h2>
+                <p className="mt-1 mb-5 text-gray-600">Pick how long you want your membership to last.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {Object.entries(plans).map(([key, val]) => (
+                    <label key={key} className="cursor-pointer">
+                      <input
+                        type="radio"
+                        name="plan"
+                        value={key}
+                        checked={plan === key}
+                        onChange={() => setPlan(key)}
+                        className="peer sr-only"
+                      />
+                      <div className="relative rounded-xl border border-yellow-600 bg-white p-4 shadow-sm transition
+                                      hover:shadow-md
+                                      peer-focus-visible:ring-4 peer-focus-visible:ring-yellow-600/30
+                                      peer-checked:border-red-900 peer-checked:ring-2 peer-checked:ring-red-900 peer-checked:bg-red-900/5">
+                        {key === '1year' && (
+                          <span className="absolute -top-2.5 right-3 rounded-full bg-red-900 px-2 py-0.5 text-[11px] font-semibold text-white">
+                            Best value
+                          </span>
+                        )}
+                        <p className="text-sm text-gray-600">{val.label}</p>
+                        <p className="mt-1 text-xl font-bold text-red-800">₹{val.price}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              {/* Card details */}
+              {(paymentMethod === 'credit' || paymentMethod === 'debit') && (
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {paymentMethod === 'credit' ? 'Credit' : 'Debit'} card information
+                  </h2>
+                  <p className="mt-1 mb-5 text-gray-600">Enter the details exactly as shown on your card.</p>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="sm:col-span-2">
+                      <label htmlFor="cardNumber" className={labelCls}>Card Number</label>
+                      <div className="relative">
+                        <CreditCardIcon className={iconCls} />
+                        <input id="cardNumber" type="text" placeholder="Card Number" inputMode="numeric" autoComplete="cc-number" maxLength={19} className={inputBase} />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="cardName" className={labelCls}>Name on Card</label>
+                      <div className="relative">
+                        <UserIcon className={iconCls} />
+                        <input id="cardName" type="text" placeholder="Name on Card" autoComplete="cc-name" className={inputBase} />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="cardExpiry" className={labelCls}>Expiry Date</label>
+                      <div className="relative">
+                        <CalendarDaysIcon className={iconCls} />
+                        <input id="cardExpiry" type="text" placeholder="MM/YY" inputMode="numeric" autoComplete="cc-exp" maxLength={5} className={inputBase} />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="cardCvv" className={labelCls}>CVV</label>
+                      <div className="relative">
+                        <LockClosedIcon className={iconCls} />
+                        <input id="cardCvv" type="password" placeholder="CVV" inputMode="numeric" autoComplete="cc-csc" maxLength={4} className={inputBase} />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* UPI */}
+              {paymentMethod === 'upi' && (
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900">UPI payment</h2>
+                  <p className="mt-1 mb-5 text-gray-600">Enter the UPI ID you want to pay from.</p>
+                  <label htmlFor="upiId" className={labelCls}>UPI ID</label>
+                  <div className="relative">
+                    <AtSymbolIcon className={iconCls} />
+                    <input
+                      id="upiId"
+                      type="text"
+                      placeholder="Enter UPI ID (e.g., name@upi)"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      className={inputBase}
+                    />
+                  </div>
+                </section>
+              )}
+
+              {/* PayPal */}
+              {paymentMethod === 'paypal' && (
+                <section>
+                  <h2 className="text-xl font-bold text-gray-900">PayPal</h2>
+                  <p className="mt-1 text-gray-600">PayPal is selected. Review your order and press Pay to continue.</p>
+                </section>
+              )}
+            </div>
+
+            {/* ---------- Right: order summary ---------- */}
+            <div className="lg:col-span-2 lg:sticky lg:top-6">
+              <div className="relative overflow-hidden bg-red-900 text-white rounded-2xl shadow-xl p-8">
+                <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
+                <div className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-yellow-600/10" />
+
+                <h3 className="relative text-xl font-bold mb-6">Order summary</h3>
+
+                <dl className="relative space-y-4 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/70">Plan</dt>
+                    <dd className="font-semibold">{selectedPlan.label}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/70">Pay with</dt>
+                    <dd className="font-semibold">{methodLabel}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/70">Price</dt>
+                    <dd className="font-semibold">₹{selectedPlan.price.toFixed(2)}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/70">GST (18%)</dt>
+                    <dd className="font-semibold">₹{gst}</dd>
+                  </div>
+                </dl>
+
+                <div className="relative my-6 h-px bg-white/20" />
+
+                <div className="relative flex items-end justify-between">
+                  <span className="text-white/70">Total</span>
+                  <span className="text-4xl font-extrabold">₹{total}</span>
+                </div>
+
+                <button
+                  onClick={handlePayment}
+                  disabled={disabled}
+                  className="relative mt-8 w-full flex items-center justify-center gap-2 bg-white text-red-900 font-bold tracking-wide py-4 rounded-xl shadow-lg
+                             hover:bg-gray-100 hover:shadow-xl active:scale-[0.99] transition duration-200
+                             focus:outline-none focus:ring-4 focus:ring-white/40
+                             disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <LockClosedIcon className="h-5 w-5" />
+                  {processing ? 'Processing...' : paymentSuccess ? 'Paid' : `Pay ₹${total}`}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
