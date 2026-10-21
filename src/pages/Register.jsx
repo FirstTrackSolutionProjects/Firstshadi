@@ -257,17 +257,52 @@ import {
   EnvelopeIcon,
   LockClosedIcon,
   ExclamationCircleIcon,
+  ShieldCheckIcon,
+  HeartIcon,
+  CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from "../context/AuthContext";
 
-// Shared input styling (same colors as before, just better spacing, radius & focus state)
-const inputCls =
-  "w-full border border-yellow-600 pl-11 pr-4 py-3 rounded-lg placeholder-yellow-600 text-black bg-white " +
-  "transition duration-200 shadow-sm hover:shadow-md " +
-  "focus:outline-none focus:ring-2 focus:ring-yellow-600/40 focus:border-yellow-600";
-
-const leftIconCls =
-  "pointer-events-none absolute inset-y-0 left-3.5 my-auto h-5 w-5 text-yellow-600";
+/* ---------- Floating-label input (defined outside so it never remounts while typing) ---------- */
+const Field = ({ icon: Icon, label, name, type = "text", value, onChange, right, prefix, ...rest }) => (
+  <div className="relative">
+    <Icon className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-yellow-600" />
+    {prefix && (
+      <span className="pointer-events-none absolute left-11 bottom-2.5 text-sm font-semibold text-red-800">
+        {prefix}
+      </span>
+    )}
+    <input
+      id={name}
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder=" "
+      required
+      className={
+        "peer w-full border border-yellow-600 rounded-xl bg-white text-black placeholder-transparent " +
+        "pl-11 pt-6 pb-2 shadow-sm transition duration-200 hover:shadow-md " +
+        "focus:outline-none focus:ring-4 focus:ring-yellow-600/20 " +
+        (prefix ? "pl-[5.5rem] " : "") +
+        (right ? "pr-12" : "pr-4")
+      }
+      {...rest}
+    />
+    <label
+      htmlFor={name}
+      className={
+        "pointer-events-none absolute top-3 text-xs text-yellow-600 transition-all duration-200 " +
+        (prefix ? "left-11 " : "left-11 ") +
+        "peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base " +
+        "peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-xs"
+      }
+    >
+      {label}
+    </label>
+    {right}
+  </div>
+);
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -291,6 +326,12 @@ const Register = () => {
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  // phone: allow digits only
+  const handlePhoneChange = (e) => {
+    const digits = e.target.value.replace(/\D/g, '');
+    setFormData(prev => ({ ...prev, phone: digits }));
   };
 
   const handleRegister = async (e) => {
@@ -328,154 +369,190 @@ const Register = () => {
     }
   };
 
+  /* ---------- UI helpers (display only) ---------- */
+  const pw = formData.password;
+  const strength =
+    (pw.length >= 8 ? 1 : 0) +
+    (/[A-Z]/.test(pw) && /[a-z]/.test(pw) ? 1 : 0) +
+    (/\d/.test(pw) ? 1 : 0) +
+    (/[^A-Za-z0-9]/.test(pw) ? 1 : 0);
+  const strengthLabel = ['Too short', 'Weak', 'Okay', 'Good', 'Strong'][pw ? strength : 0];
+  const passwordsMatch = formData.confirmPassword && formData.password === formData.confirmPassword;
+
+  const eyeBtn = (shown, toggle) => (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={shown ? 'Hide password' : 'Show password'}
+      className="absolute inset-y-0 right-3 my-auto h-9 w-9 flex items-center justify-center rounded-full hover:bg-yellow-600/10 transition focus:outline-none focus:ring-2 focus:ring-yellow-600/40"
+    >
+      {shown ? <EyeSlashIcon className="h-5 w-5 text-yellow-600" /> : <EyeIcon className="h-5 w-5 text-yellow-600" />}
+    </button>
+  );
+
   return (
     <div>
-      <div className="min-h-screen flex flex-col items-center justify-start bg-gray-100 px-4 py-10">
+      <style>{`
+        @keyframes regRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+        .reg-rise { animation: regRise .6s ease-out both; }
+        @media (prefers-reduced-motion: reduce) { .reg-rise { animation: none; } }
+      `}</style>
 
-        {/* Hero image */}
-        <div className="w-full max-w-md">
-          <img
-            src="./image/s33.jpg"
-            alt="Registration Visual"
-            className="w-full h-56 sm:h-64 object-cover rounded-2xl shadow-xl"
-          />
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
+        <div className="reg-rise w-full max-w-5xl grid md:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden">
 
-        {/* Card (slightly overlaps the image for depth) */}
-        <div className="relative -mt-10 w-full max-w-md bg-white px-6 sm:px-8 pt-8 pb-7 rounded-2xl shadow-2xl border-t-4 border-yellow-600">
-          <div className="text-center mb-7">
-            <h2 className="text-3xl font-bold tracking-tight text-red-800">Create Account</h2>
-            <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-yellow-600" />
+          {/* ---------- Left: image panel ---------- */}
+          <div className="relative min-h-[280px] md:min-h-full">
+            <img
+              src="./image/s33.jpg"
+              alt="Registration Visual"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-red-900/90 via-red-900/30 to-transparent" />
+
+            <div className="relative h-full flex flex-col justify-end p-7 md:p-10 text-white">
+              <h1 className="text-3xl md:text-4xl font-bold leading-tight">
+                Your story begins with a single step.
+              </h1>
+              <p className="mt-3 text-sm md:text-base text-white/85 max-w-sm">
+                Create your free account and meet people who share your values and your family traditions.
+              </p>
+
+              <ul className="mt-6 space-y-3 text-sm">
+                <li className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+                    <CheckBadgeIcon className="h-5 w-5" />
+                  </span>
+                  Verified profiles
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+                    <ShieldCheckIcon className="h-5 w-5" />
+                  </span>
+                  Your details stay private and secure
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+                    <HeartIcon className="h-5 w-5" />
+                  </span>
+                  Matches made for lasting relationships
+                </li>
+              </ul>
+            </div>
           </div>
 
-          {error && (
-            <div
-              role="alert"
-              className="mb-5 flex items-start gap-2 p-3 rounded-lg bg-red-100 text-red-700 text-sm border border-red-200"
-            >
-              <ExclamationCircleIcon className="h-5 w-5 shrink-0 mt-px" />
-              <span>{error}</span>
-            </div>
-          )}
+          {/* ---------- Right: form ---------- */}
+          <div className="p-7 sm:p-10">
+            <h2 className="text-3xl font-bold tracking-tight text-red-800">Create Account</h2>
+            <p className="mt-1 text-sm text-gray-500">It takes less than a minute.</p>
+            <div className="mt-3 mb-7 h-1 w-14 rounded-full bg-yellow-600" />
 
-          <form className="space-y-5" onSubmit={handleRegister}>
-            {/* Full name */}
-            <div className="relative">
-              <UserIcon className={leftIconCls} />
-              <input
-                type="text"
+            {error && (
+              <div
+                role="alert"
+                className="mb-5 flex items-start gap-2 p-3 rounded-xl bg-red-100 text-red-700 text-sm border border-red-200"
+              >
+                <ExclamationCircleIcon className="h-5 w-5 shrink-0 mt-px" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form className="space-y-4" onSubmit={handleRegister}>
+              <Field
+                icon={UserIcon}
+                label="Full Name"
                 name="name"
-                placeholder="Full Name"
-                required
-                autoComplete="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={inputCls}
+                autoComplete="name"
               />
-            </div>
 
-            {/* Phone */}
-            <div className="relative">
-              <PhoneIcon className={leftIconCls} />
-              <input
-                type="text"
+              <Field
+                icon={PhoneIcon}
+                label="Phone Number (10 digits)"
                 name="phone"
-                placeholder="Phone Number (10 digits)"
-                required
+                value={formData.phone}
+                onChange={handlePhoneChange}
                 maxLength={10}
                 inputMode="numeric"
                 autoComplete="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className={inputCls}
+                prefix="+91"
               />
-            </div>
 
-            {/* Email */}
-            <div className="relative">
-              <EnvelopeIcon className={leftIconCls} />
-              <input
-                type="email"
+              <Field
+                icon={EnvelopeIcon}
+                label="Email"
                 name="email"
-                placeholder="Email"
-                required
-                autoComplete="email"
+                type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={inputCls}
+                autoComplete="email"
               />
-            </div>
 
-            {/* Password */}
-            <div className="relative">
-              <LockClosedIcon className={leftIconCls} />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                placeholder="Password"
-                required
-                autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
-                className={inputCls + " pr-12"}
-              />
+              <div>
+                <Field
+                  icon={LockClosedIcon}
+                  label="Password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                  right={eyeBtn(showPassword, () => setShowPassword(!showPassword))}
+                />
+                {pw && (
+                  <div className="mt-2 px-1">
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3, 4].map(i => (
+                        <div
+                          key={i}
+                          className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${i <= strength ? 'bg-yellow-600' : 'bg-gray-200'}`}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Password strength: {strengthLabel}</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <Field
+                  icon={LockClosedIcon}
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                  right={eyeBtn(showConfirmPassword, () => setShowConfirmPassword(!showConfirmPassword))}
+                />
+                {formData.confirmPassword && (
+                  <p className={`mt-1 px-1 text-xs ${passwordsMatch ? 'text-gray-500' : 'text-red-600'}`}>
+                    {passwordsMatch ? 'Passwords match' : 'Passwords do not match yet'}
+                  </p>
+                )}
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute inset-y-0 right-3 flex items-center rounded-md px-1 focus:outline-none focus:ring-2 focus:ring-yellow-600/40"
+                type="submit"
+                disabled={submitting}
+                className="w-full mt-2 bg-red-900 text-white font-semibold tracking-wide py-3.5 rounded-xl shadow-lg
+                           hover:bg-red-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
+                           transition duration-200
+                           focus:outline-none focus:ring-4 focus:ring-red-800/30
+                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                {showPassword ? <EyeSlashIcon className="h-5 w-5 text-yellow-600" /> : <EyeIcon className="h-5 w-5 text-yellow-600" />}
+                {submitting ? 'REGISTERING...' : 'REGISTER'}
               </button>
-            </div>
+            </form>
 
-            {/* Confirm Password */}
-            <div className="relative">
-              <LockClosedIcon className={leftIconCls} />
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                required
-                autoComplete="new-password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={inputCls + " pr-12"}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                className="absolute inset-y-0 right-3 flex items-center rounded-md px-1 focus:outline-none focus:ring-2 focus:ring-yellow-600/40"
-              >
-                {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5 text-yellow-600" /> : <EyeIcon className="h-5 w-5 text-yellow-600" />}
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-red-900 text-white font-semibold tracking-wide py-3 rounded-lg shadow-lg
-                         hover:bg-red-700 hover:shadow-xl active:scale-[0.98] transition duration-200
-                         focus:outline-none focus:ring-2 focus:ring-red-800/50 focus:ring-offset-2
-                         disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? 'REGISTERING...' : 'REGISTER'}
-            </button>
-          </form>
-
-          <div className="flex items-center gap-3 my-6">
-            <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="h-px flex-1 bg-gray-200" />
+            <p className="text-center text-sm mt-6">
+              Already have an account?{" "}
+              <Link to="/signin" className="text-red-600 font-semibold hover:underline">
+                Sign In
+              </Link>
+            </p>
           </div>
-
-          <p className="text-center text-sm">
-            Already have an account?{" "}
-            <Link to="/signin" className="text-red-600 font-semibold hover:underline">
-              Sign In
-            </Link>
-          </p>
         </div>
       </div>
       <Footer />
