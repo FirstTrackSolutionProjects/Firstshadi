@@ -22,6 +22,9 @@ const inputBase =
   "py-3.5 pl-11 pr-4 shadow-sm transition duration-200 hover:shadow-md " +
   "focus:outline-none focus:ring-4 focus:ring-yellow-600/20";
 const labelCls = "block mb-2 text-sm font-semibold text-gray-800";
+const stepBadge =
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-900 text-white text-sm font-bold shadow";
+const planDays = { '7days': 7, '15days': 15, '30days': 30, '3months': 90, '5months': 150, '1year': 365 };
 const iconCls = "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-yellow-600";
 
 const Paym = () => {
@@ -37,6 +40,12 @@ const Paym = () => {
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
 
+  // UI-only state for the live card preview
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+
   const plans = {
     '7days': { label: '7 Days', price: 199 },
     '15days': { label: '15 Days', price: 399 },
@@ -49,6 +58,17 @@ const Paym = () => {
   const selectedPlan = plans[plan];
   const gst = (selectedPlan.price * 0.18).toFixed(2);
   const total = (selectedPlan.price + parseFloat(gst)).toFixed(2);
+
+  const handleCardNumber = (e) => {
+    const d = e.target.value.replace(/\D/g, '').slice(0, 16);
+    setCardNumber(d.replace(/(.{4})/g, '$1 ').trim());
+  };
+  const handleCardExpiry = (e) => {
+    let d = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (d.length > 2) d = d.slice(0, 2) + '/' + d.slice(2);
+    setCardExpiry(d);
+  };
+  const handleCardCvv = (e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4));
 
   const handlePayment = async () => {
     setError('');
@@ -103,6 +123,11 @@ const Paym = () => {
     { value: 'paypal', label: 'PayPal', icon: GlobeAltIcon },
     { value: 'upi', label: 'UPI', icon: DevicePhoneMobileIcon },
   ];
+  const validTill = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + planDays[plan]);
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  })();
   const methodLabel = methods.find(m => m.value === paymentMethod)?.label;
   const disabled = processing || paymentSuccess;
 
@@ -173,8 +198,13 @@ const Paym = () => {
 
               {/* Payment method */}
               <section>
-                <h2 className="text-xl font-bold text-gray-900">Choose a payment method</h2>
-                <p className="mt-1 mb-5 text-gray-600">Select how you would like to pay.</p>
+                <div className="flex items-start gap-3 mb-5">
+                  <span className={stepBadge}>1</span>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Choose a payment method</h2>
+                    <p className="mt-0.5 text-gray-600">Select how you would like to pay.</p>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {methods.map(({ value, label, icon: Icon }) => (
                     <label key={value} className="cursor-pointer">
@@ -200,8 +230,13 @@ const Paym = () => {
 
               {/* Membership plan */}
               <section>
-                <h2 className="text-xl font-bold text-gray-900">Membership plan</h2>
-                <p className="mt-1 mb-5 text-gray-600">Pick how long you want your membership to last.</p>
+                <div className="flex items-start gap-3 mb-5">
+                  <span className={stepBadge}>2</span>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Membership plan</h2>
+                    <p className="mt-0.5 text-gray-600">Pick how long you want your membership to last.</p>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {Object.entries(plans).map(([key, val]) => (
                     <label key={key} className="cursor-pointer">
@@ -222,8 +257,12 @@ const Paym = () => {
                             Best value
                           </span>
                         )}
+                        {plan === key && (
+                          <CheckCircleIcon className="absolute top-3 right-3 h-5 w-5 text-red-900" />
+                        )}
                         <p className="text-sm text-gray-600">{val.label}</p>
-                        <p className="mt-1 text-xl font-bold text-red-800">₹{val.price}</p>
+                        <p className="mt-1 text-2xl font-bold text-red-800">₹{val.price}</p>
+                        <p className="mt-1 text-xs text-gray-500">about ₹{Math.round(val.price / planDays[key])} / day</p>
                       </div>
                     </label>
                   ))}
@@ -233,37 +272,113 @@ const Paym = () => {
               {/* Card details */}
               {(paymentMethod === 'credit' || paymentMethod === 'debit') && (
                 <section>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {paymentMethod === 'credit' ? 'Credit' : 'Debit'} card information
-                  </h2>
-                  <p className="mt-1 mb-5 text-gray-600">Enter the details exactly as shown on your card.</p>
+                  <div className="flex items-start gap-3 mb-6">
+                    <span className={stepBadge}>3</span>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {paymentMethod === 'credit' ? 'Credit' : 'Debit'} card information
+                      </h2>
+                      <p className="mt-0.5 text-gray-600">Enter the details exactly as shown on your card.</p>
+                    </div>
+                  </div>
+
+                  {/* Live card preview */}
+                  <div
+                    className="relative mx-auto mb-8 w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-red-900 to-red-700 p-6 text-white shadow-xl"
+                    style={{ aspectRatio: '1.586 / 1' }}
+                    aria-hidden="true"
+                  >
+                    <div className="pointer-events-none absolute -top-14 -right-10 h-44 w-44 rounded-full bg-white/10" />
+                    <div className="pointer-events-none absolute -bottom-20 -left-12 h-52 w-52 rounded-full bg-yellow-600/20" />
+
+                    <div className="relative flex items-center justify-between">
+                      <div className="h-9 w-12 rounded-md bg-yellow-600/90 shadow-inner" />
+                      <span className="text-xs font-semibold uppercase tracking-widest text-white/80">
+                        {paymentMethod === 'credit' ? 'Credit' : 'Debit'}
+                      </span>
+                    </div>
+
+                    <p className="relative mt-8 text-xl sm:text-2xl font-semibold tracking-[0.16em]">
+                      {cardNumber || '•••• •••• •••• ••••'}
+                    </p>
+
+                    <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-widest text-white/70">Card holder</p>
+                        <p className="truncate text-sm font-semibold uppercase">{cardName || 'Your name'}</p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-[10px] uppercase tracking-widest text-white/70">Expires</p>
+                        <p className="text-sm font-semibold">{cardExpiry || 'MM/YY'}</p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid sm:grid-cols-2 gap-6">
                     <div className="sm:col-span-2">
                       <label htmlFor="cardNumber" className={labelCls}>Card Number</label>
                       <div className="relative">
                         <CreditCardIcon className={iconCls} />
-                        <input id="cardNumber" type="text" placeholder="Card Number" inputMode="numeric" autoComplete="cc-number" maxLength={19} className={inputBase} />
+                        <input
+                          id="cardNumber"
+                          type="text"
+                          placeholder="Card Number"
+                          inputMode="numeric"
+                          autoComplete="cc-number"
+                          maxLength={19}
+                          value={cardNumber}
+                          onChange={handleCardNumber}
+                          className={inputBase}
+                        />
                       </div>
                     </div>
                     <div className="sm:col-span-2">
                       <label htmlFor="cardName" className={labelCls}>Name on Card</label>
                       <div className="relative">
                         <UserIcon className={iconCls} />
-                        <input id="cardName" type="text" placeholder="Name on Card" autoComplete="cc-name" className={inputBase} />
+                        <input
+                          id="cardName"
+                          type="text"
+                          placeholder="Name on Card"
+                          autoComplete="cc-name"
+                          value={cardName}
+                          onChange={(e) => setCardName(e.target.value)}
+                          className={inputBase}
+                        />
                       </div>
                     </div>
                     <div>
                       <label htmlFor="cardExpiry" className={labelCls}>Expiry Date</label>
                       <div className="relative">
                         <CalendarDaysIcon className={iconCls} />
-                        <input id="cardExpiry" type="text" placeholder="MM/YY" inputMode="numeric" autoComplete="cc-exp" maxLength={5} className={inputBase} />
+                        <input
+                          id="cardExpiry"
+                          type="text"
+                          placeholder="MM/YY"
+                          inputMode="numeric"
+                          autoComplete="cc-exp"
+                          maxLength={5}
+                          value={cardExpiry}
+                          onChange={handleCardExpiry}
+                          className={inputBase}
+                        />
                       </div>
                     </div>
                     <div>
                       <label htmlFor="cardCvv" className={labelCls}>CVV</label>
                       <div className="relative">
                         <LockClosedIcon className={iconCls} />
-                        <input id="cardCvv" type="password" placeholder="CVV" inputMode="numeric" autoComplete="cc-csc" maxLength={4} className={inputBase} />
+                        <input
+                          id="cardCvv"
+                          type="password"
+                          placeholder="CVV"
+                          inputMode="numeric"
+                          autoComplete="cc-csc"
+                          maxLength={4}
+                          value={cardCvv}
+                          onChange={handleCardCvv}
+                          className={inputBase}
+                        />
                       </div>
                     </div>
                   </div>
@@ -273,8 +388,13 @@ const Paym = () => {
               {/* UPI */}
               {paymentMethod === 'upi' && (
                 <section>
-                  <h2 className="text-xl font-bold text-gray-900">UPI payment</h2>
-                  <p className="mt-1 mb-5 text-gray-600">Enter the UPI ID you want to pay from.</p>
+                  <div className="flex items-start gap-3 mb-5">
+                    <span className={stepBadge}>3</span>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">UPI payment</h2>
+                      <p className="mt-0.5 text-gray-600">Enter the UPI ID you want to pay from.</p>
+                    </div>
+                  </div>
                   <label htmlFor="upiId" className={labelCls}>UPI ID</label>
                   <div className="relative">
                     <AtSymbolIcon className={iconCls} />
@@ -293,14 +413,19 @@ const Paym = () => {
               {/* PayPal */}
               {paymentMethod === 'paypal' && (
                 <section>
-                  <h2 className="text-xl font-bold text-gray-900">PayPal</h2>
-                  <p className="mt-1 text-gray-600">PayPal is selected. Review your order and press Pay to continue.</p>
+                  <div className="flex items-start gap-3">
+                    <span className={stepBadge}>3</span>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">PayPal</h2>
+                      <p className="mt-0.5 text-gray-600">PayPal is selected. Review your order and press Pay to continue.</p>
+                    </div>
+                  </div>
                 </section>
               )}
             </div>
 
             {/* ---------- Right: order summary ---------- */}
-            <div className="lg:col-span-2 lg:sticky lg:top-6">
+            <div className="lg:col-span-2 lg:sticky lg:top-28">
               <div className="relative overflow-hidden bg-red-900 text-white rounded-2xl shadow-xl p-8">
                 <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
                 <div className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-yellow-600/10" />
@@ -311,6 +436,10 @@ const Paym = () => {
                   <div className="flex justify-between gap-4">
                     <dt className="text-white/70">Plan</dt>
                     <dd className="font-semibold">{selectedPlan.label}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/70">Valid till</dt>
+                    <dd className="font-semibold">{validTill}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="text-white/70">Pay with</dt>
