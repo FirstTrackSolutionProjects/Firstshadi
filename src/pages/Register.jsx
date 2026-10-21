@@ -260,49 +260,20 @@ import {
   ShieldCheckIcon,
   HeartIcon,
   CheckBadgeIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from "../context/AuthContext";
 
-/* ---------- Floating-label input (defined outside so it never remounts while typing) ---------- */
-const Field = ({ icon: Icon, label, name, type = "text", value, onChange, right, prefix, ...rest }) => (
-  <div className="relative">
-    <Icon className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-yellow-600" />
-    {prefix && (
-      <span className="pointer-events-none absolute left-11 bottom-2.5 text-sm font-semibold text-red-800">
-        {prefix}
-      </span>
-    )}
-    <input
-      id={name}
-      type={type}
-      name={name}
-      value={value}
-      onChange={onChange}
-      placeholder=" "
-      required
-      className={
-        "peer w-full border border-yellow-600 rounded-xl bg-white text-black placeholder-transparent " +
-        "pl-11 pt-6 pb-2 shadow-sm transition duration-200 hover:shadow-md " +
-        "focus:outline-none focus:ring-4 focus:ring-yellow-600/20 " +
-        (prefix ? "pl-[5.5rem] " : "") +
-        (right ? "pr-12" : "pr-4")
-      }
-      {...rest}
-    />
-    <label
-      htmlFor={name}
-      className={
-        "pointer-events-none absolute top-3 text-xs text-yellow-600 transition-all duration-200 " +
-        (prefix ? "left-11 " : "left-11 ") +
-        "peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-base " +
-        "peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-xs"
-      }
-    >
-      {label}
-    </label>
-    {right}
-  </div>
-);
+const baseInput =
+  "w-full border border-yellow-600 rounded-xl bg-white text-black placeholder-yellow-600 " +
+  "py-3.5 shadow-sm transition duration-200 hover:shadow-md " +
+  "focus:outline-none focus:ring-4 focus:ring-yellow-600/20";
+const inputCls = baseInput + " pl-11 pr-4";
+const inputPwCls = baseInput + " pl-11 pr-12";
+const inputPhoneCls = baseInput + " pl-[5.75rem] pr-4";
+
+const labelCls = "block mb-2 text-sm font-semibold text-gray-800";
+const iconCls = "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-yellow-600";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -369,7 +340,6 @@ const Register = () => {
     }
   };
 
-  /* ---------- UI helpers (display only) ---------- */
   const pw = formData.password;
   const strength =
     (pw.length >= 8 ? 1 : 0) +
@@ -390,163 +360,222 @@ const Register = () => {
     </button>
   );
 
+  const perks = [
+    { icon: CheckBadgeIcon, title: "Verified profiles", text: "Every profile is checked before it appears in matches." },
+    { icon: ShieldCheckIcon, title: "Private and secure", text: "Your personal details stay protected." },
+    { icon: HeartIcon, title: "Made for lasting relationships", text: "Find people who share your values and family traditions." },
+  ];
+
   return (
     <div>
       <style>{`
-        @keyframes regRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+        @keyframes regRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         .reg-rise { animation: regRise .6s ease-out both; }
-        @media (prefers-reduced-motion: reduce) { .reg-rise { animation: none; } }
+        .reg-rise-2 { animation: regRise .6s .12s ease-out both; }
+        @media (prefers-reduced-motion: reduce) { .reg-rise, .reg-rise-2 { animation: none; } }
       `}</style>
+      <div className="relative overflow-hidden min-h-screen bg-gray-100 px-4 py-12">
+        <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-yellow-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute top-1/3 -right-24 h-80 w-80 rounded-full bg-red-900/10 blur-3xl" />
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
-        <div className="reg-rise w-full max-w-5xl grid md:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* Heading */}
+        <div className="relative reg-rise text-center max-w-2xl mx-auto mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-red-800">Create Account</h1>
+          <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-red-900" />
+          <p className="mt-5 text-lg text-gray-700">
+            Join First Marriage today and start meeting people who are looking for the same thing you are.
+          </p>
+        </div>
 
-          {/* ---------- Left: image panel ---------- */}
-          <div className="relative min-h-[280px] md:min-h-full">
-            <img
-              src="./image/s33.jpg"
-              alt="Registration Visual"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-red-900/90 via-red-900/30 to-transparent" />
+        <div className="relative reg-rise-2 max-w-6xl mx-auto grid lg:grid-cols-5 gap-8 items-start">
 
-            <div className="relative h-full flex flex-col justify-end p-7 md:p-10 text-white">
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight">
+          {/* ---------- Left: image + info card ---------- */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="relative overflow-hidden rounded-2xl shadow-xl">
+              <img
+                src="./image/s33.jpg"
+                alt="Registration Visual"
+                className="w-full h-80 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-red-900/85 via-transparent to-transparent" />
+              <p className="absolute bottom-5 left-6 right-6 text-white text-xl font-bold leading-snug">
                 Your story begins with a single step.
-              </h1>
-              <p className="mt-3 text-sm md:text-base text-white/85 max-w-sm">
-                Create your free account and meet people who share your values and your family traditions.
               </p>
+            </div>
 
-              <ul className="mt-6 space-y-3 text-sm">
-                <li className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 backdrop-blur">
-                    <CheckBadgeIcon className="h-5 w-5" />
-                  </span>
-                  Verified profiles
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 backdrop-blur">
-                    <ShieldCheckIcon className="h-5 w-5" />
-                  </span>
-                  Your details stay private and secure
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 backdrop-blur">
-                    <HeartIcon className="h-5 w-5" />
-                  </span>
-                  Matches made for lasting relationships
-                </li>
+            <div className="relative overflow-hidden bg-red-900 text-white rounded-2xl shadow-xl p-8">
+              <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
+              <div className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-yellow-600/10" />
+              <h3 className="relative text-xl font-bold mb-6">Why join First Marriage</h3>
+              <ul className="relative space-y-5">
+                {perks.map(({ icon: Icon, title, text }) => (
+                  <li key={title} className="flex items-start gap-4">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15">
+                      <Icon className="h-6 w-6" />
+                    </span>
+                    <div>
+                      <p className="text-sm text-white/70">{title}</p>
+                      <p className="font-semibold leading-snug">{text}</p>
+                    </div>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
-          {/* ---------- Right: form ---------- */}
-          <div className="p-7 sm:p-10">
-            <h2 className="text-3xl font-bold tracking-tight text-red-800">Create Account</h2>
-            <p className="mt-1 text-sm text-gray-500">It takes less than a minute.</p>
-            <div className="mt-3 mb-7 h-1 w-14 rounded-full bg-yellow-600" />
+          {/* ---------- Right: form card ---------- */}
+          <div className="lg:col-span-3 bg-white rounded-2xl shadow-xl border-t-4 border-red-900 p-8 md:p-10">
+            <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
+            <p className="mt-1 mb-8 text-gray-600">Fill in your details to get started.</p>
 
             {error && (
               <div
                 role="alert"
-                className="mb-5 flex items-start gap-2 p-3 rounded-xl bg-red-100 text-red-700 text-sm border border-red-200"
+                className="mb-6 flex items-start gap-2 p-3 rounded-xl bg-red-100 text-red-700 text-sm border border-red-200"
               >
                 <ExclamationCircleIcon className="h-5 w-5 shrink-0 mt-px" />
                 <span>{error}</span>
               </div>
             )}
 
-            <form className="space-y-4" onSubmit={handleRegister}>
-              <Field
-                icon={UserIcon}
-                label="Full Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                autoComplete="name"
-              />
-
-              <Field
-                icon={PhoneIcon}
-                label="Phone Number (10 digits)"
-                name="phone"
-                value={formData.phone}
-                onChange={handlePhoneChange}
-                maxLength={10}
-                inputMode="numeric"
-                autoComplete="tel"
-                prefix="+91"
-              />
-
-              <Field
-                icon={EnvelopeIcon}
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                autoComplete="email"
-              />
-
-              <div>
-                <Field
-                  icon={LockClosedIcon}
-                  label="Password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                  right={eyeBtn(showPassword, () => setShowPassword(!showPassword))}
-                />
-                {pw && (
-                  <div className="mt-2 px-1">
-                    <div className="flex gap-1.5">
-                      {[1, 2, 3, 4].map(i => (
-                        <div
-                          key={i}
-                          className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${i <= strength ? 'bg-yellow-600' : 'bg-gray-200'}`}
-                        />
-                      ))}
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500">Password strength: {strengthLabel}</p>
+            <form className="space-y-6" onSubmit={handleRegister}>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="name" className={labelCls}>Full Name</label>
+                  <div className="relative">
+                    <UserIcon className={iconCls} />
+                    <input
+                      id="name"
+                      type="text"
+                      name="name"
+                      placeholder="Full Name"
+                      required
+                      autoComplete="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className={inputCls}
+                    />
                   </div>
-                )}
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className={labelCls}>Phone Number</label>
+                  <div className="relative">
+                    <PhoneIcon className={iconCls} />
+                    <div className="pointer-events-none absolute left-11 top-1/2 -translate-y-1/2 flex h-6 items-center border-r border-yellow-600/40 pr-3">
+                      <span className="text-sm font-semibold text-red-800">+91</span>
+                    </div>
+                    <input
+                      id="phone"
+                      type="text"
+                      name="phone"
+                      placeholder="10 digits"
+                      required
+                      maxLength={10}
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      className={inputPhoneCls}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
-                <Field
-                  icon={LockClosedIcon}
-                  label="Confirm Password"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                  right={eyeBtn(showConfirmPassword, () => setShowConfirmPassword(!showConfirmPassword))}
-                />
-                {formData.confirmPassword && (
-                  <p className={`mt-1 px-1 text-xs ${passwordsMatch ? 'text-gray-500' : 'text-red-600'}`}>
-                    {passwordsMatch ? 'Passwords match' : 'Passwords do not match yet'}
-                  </p>
-                )}
+                <label htmlFor="email" className={labelCls}>Email</label>
+                <div className="relative">
+                  <EnvelopeIcon className={iconCls} />
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    required
+                    autoComplete="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="password" className={labelCls}>Password</label>
+                  <div className="relative">
+                    <LockClosedIcon className={iconCls} />
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      placeholder="Password"
+                      required
+                      autoComplete="new-password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className={inputPwCls}
+                    />
+                    {eyeBtn(showPassword, () => setShowPassword(!showPassword))}
+                  </div>
+                  {pw && (
+                    <div className="mt-2">
+                      <div className="flex gap-1.5">
+                        {[1, 2, 3, 4].map(i => (
+                          <div
+                            key={i}
+                            className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${i <= strength ? 'bg-yellow-600' : 'bg-gray-200'}`}
+                          />
+                        ))}
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">Strength: {strengthLabel}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="confirmPassword" className={labelCls}>Confirm Password</label>
+                  <div className="relative">
+                    <LockClosedIcon className={iconCls} />
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      placeholder="Confirm Password"
+                      required
+                      autoComplete="new-password"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className={inputPwCls}
+                    />
+                    {eyeBtn(showConfirmPassword, () => setShowConfirmPassword(!showConfirmPassword))}
+                  </div>
+                  {formData.confirmPassword && (
+                    <p className={`mt-1.5 text-xs ${passwordsMatch ? 'text-gray-500' : 'text-red-600'}`}>
+                      {passwordsMatch ? 'Passwords match' : 'Passwords do not match yet'}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full mt-2 bg-red-900 text-white font-semibold tracking-wide py-3.5 rounded-xl shadow-lg
-                           hover:bg-red-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]
-                           transition duration-200
+                className="w-full flex items-center justify-center gap-2 bg-red-900 text-white font-semibold tracking-wide py-4 rounded-xl shadow-lg
+                           hover:bg-red-700 hover:shadow-xl active:scale-[0.99] transition duration-200
                            focus:outline-none focus:ring-4 focus:ring-red-800/30
-                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                           disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <UserPlusIcon className="h-5 w-5" />
                 {submitting ? 'REGISTERING...' : 'REGISTER'}
               </button>
             </form>
 
-            <p className="text-center text-sm mt-6">
+            <p className="text-center text-xs text-gray-500 mt-4">
+              By registering, you agree to our Terms and Privacy Policy.
+            </p>
+
+            <p className="text-center text-sm mt-5">
               Already have an account?{" "}
               <Link to="/signin" className="text-red-600 font-semibold hover:underline">
                 Sign In
