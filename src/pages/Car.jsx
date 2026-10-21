@@ -300,13 +300,16 @@ const Car = () => {
     return (
         <div className="min-h-screen bg-slate-100 font-sans">
             {/* HEADER + STEPPER */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-red-950 via-red-900 to-rose-700 text-white px-4 pt-10 pb-28 sm:pt-14 sm:pb-32">
-                <div className="pointer-events-none absolute -top-24 -left-16 h-72 w-72 rounded-full bg-pink-500/25 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-24 -right-10 h-72 w-72 rounded-full bg-rose-400/20 blur-3xl" />
+            <div
+                className="relative overflow-hidden bg-cover bg-center md:bg-fixed text-white px-4 pt-14 pb-28 sm:pt-20 sm:pb-32 bg-red-900"
+                style={{ backgroundImage: `url('https://images.unsplash.com/photo-1501901609772-df0848060b33?auto=format&fit=crop&q=80&w=2070')` }}
+            >
+                {/* Dark red overlay: photo dikhti rahe, text bhi padhne me aaye */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-red-950/70 via-red-900/50 to-red-950/85" />
 
                 <div className="relative max-w-4xl mx-auto">
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-center tracking-tight">Complete Your Profile</h1>
-                    <p className="text-center text-rose-100 mt-2 text-sm sm:text-base">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-center tracking-tight drop-shadow-lg">Complete Your Profile</h1>
+                    <p className="text-center text-rose-50 mt-2 text-sm sm:text-base drop-shadow-md">
                         A complete profile gets more attention. Let's make yours shine! ✨
                     </p>
 
