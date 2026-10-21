@@ -1,5 +1,5 @@
 // src/pages/Sol.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   CakeIcon, UsersIcon, HeartIcon, ChatBubbleLeftRightIcon, BriefcaseIcon,
@@ -200,6 +200,8 @@ function Sol() {
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
   const [selectedCaste, setSelectedCaste] = useState('');
+  const [isCasteMenuOpen, setIsCasteMenuOpen] = useState(false);
+  const casteMenuRef = useRef(null);
   const [searchName, setSearchName] = useState('');
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -235,6 +237,24 @@ function Sol() {
     loadProfiles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!isCasteMenuOpen) return undefined;
+    const closeOnOutsideClick = (event) => {
+      if (casteMenuRef.current && !casteMenuRef.current.contains(event.target)) {
+        setIsCasteMenuOpen(false);
+      }
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setIsCasteMenuOpen(false);
+    };
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isCasteMenuOpen]);
 
   useEffect(() => {
     (async () => {
@@ -304,17 +324,42 @@ function Sol() {
               <MagnifyingGlassIcon className="h-6 w-6 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
             </div>
 
-            <div className="relative">
-              <select
-                value={selectedCaste}
-                onChange={(e) => setSelectedCaste(e.target.value)}
-                className="w-64 appearance-none bg-white border border-gray-300 rounded-full px-5 py-3 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-300 text-slate-700"
+            <div className="relative w-64" ref={casteMenuRef}>
+              <button
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded={isCasteMenuOpen}
+                onClick={() => setIsCasteMenuOpen((open) => !open)}
+                className="w-full flex items-center justify-between bg-white border border-gray-300 rounded-full px-5 py-3 text-left text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
               >
-                <option value="">All Castes</option>
-                {casteOptions.map((caste, i) => (
-                  <option key={i} value={caste}>{caste}</option>
-                ))}
-              </select>
+                <span>{selectedCaste || 'All Castes'}</span>
+                <span aria-hidden="true" className={`ml-3 text-slate-500 transition-transform ${isCasteMenuOpen ? 'rotate-180' : ''}`}>▾</span>
+              </button>
+              {isCasteMenuOpen && (
+                <div role="listbox" aria-label="Filter by caste" className="absolute left-0 right-0 top-full mt-2 z-40 max-h-60 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-1 shadow-xl">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={!selectedCaste}
+                    onClick={() => { setSelectedCaste(''); setIsCasteMenuOpen(false); }}
+                    className={`w-full rounded-xl px-4 py-2.5 text-left text-sm hover:bg-orange-50 ${!selectedCaste ? 'bg-orange-50 font-semibold text-orange-700' : 'text-slate-700'}`}
+                  >
+                    All Castes
+                  </button>
+                  {casteOptions.map((caste) => (
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={selectedCaste === caste}
+                      key={caste}
+                      onClick={() => { setSelectedCaste(caste); setIsCasteMenuOpen(false); }}
+                      className={`w-full rounded-xl px-4 py-2.5 text-left text-sm hover:bg-orange-50 ${selectedCaste === caste ? 'bg-orange-50 font-semibold text-orange-700' : 'text-slate-700'}`}
+                    >
+                      {caste}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
