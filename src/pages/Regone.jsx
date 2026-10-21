@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motherTongues } from '../data/motherTongues';
 import {
   CalendarDaysIcon,
@@ -8,6 +8,8 @@ import {
   HeartIcon,
   ArrowsUpDownIcon,
   ChevronDownIcon,
+  MagnifyingGlassIcon,
+  CheckIcon,
   ArrowRightIcon,
   ClockIcon,
   EyeSlashIcon,
@@ -20,29 +22,164 @@ const labelCls = "block mb-2 text-sm font-semibold text-red-800";
 const iconCls = "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-yellow-600";
 const star = <span className="text-red-500"> *</span>;
 
-/* ---------- UI helper: a select with a left icon and a custom arrow (outside the page component so it never remounts) ---------- */
-const SelectField = ({ id, label, icon: Icon, name, value, onChange, placeholder, options }) => (
-  <div>
-    <label htmlFor={id} className={labelCls}>{label}{star}</label>
-    <div className="relative">
-      <Icon className={iconCls} />
-      <select
-        id={id}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required
-        className={inputBase + " appearance-none pr-10 " + (value ? "text-black" : "text-yellow-600")}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((opt, index) => (
-          <option key={index} value={opt} className="text-black">{opt}</option>
-        ))}
-      </select>
-      <ChevronDownIcon className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-yellow-600" />
+/* ---------- Custom dropdown (replaces the browser's plain select popup) ----------
+   Defined outside the page component so it never remounts.
+   It calls onChange with { target: { name, value } }, so the page's handleChange works unchanged. */
+const Dropdown = ({ id, label, icon: Icon, name, value, onChange, placeholder, options }) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [active, setActive] = useState(0);
+  const wrapRef = useRef(null);
+  const triggerRef = useRef(null);
+  const searchRef = useRef(null);
+  const listRef = useRef(null);
+
+  const searchable = options.length > 8;
+  const filtered = options.filter((o) => o.toLowerCase().includes(query.trim().toLowerCase()));
+
+  // close when clicking outside
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  useEffect(() => {
+    if (open && searchable) searchRef.current?.focus();
+  }, [open, searchable]);
+
+  // keep the highlighted option visible while using the arrow keys
+  useEffect(() => {
+    if (open) listRef.current?.children[active]?.scrollIntoView({ block: 'nearest' });
+  }, [active, open]);
+
+  const openPanel = () => {
+    setQuery('');
+    const i = options.indexOf(value);
+    setActive(i >= 0 ? i : 0);
+    setOpen(true);
+  };
+
+  const choose = (opt) => {
+    onChange({ target: { name, value: opt } });
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const onKeyDown = (e) => {
+    if (!open) {
+      if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key) && e.target === triggerRef.current) {
+        e.preventDefault();
+        openPanel();
+      }
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive((i) => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive((i) => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filtered[active]) choose(filtered[active]);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setOpen(false);
+      triggerRef.current?.focus();
+    } else if (e.key === 'Tab') {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelCls}>{label}{star}</label>
+      <div className="relative" ref={wrapRef} onKeyDown={onKeyDown}>
+        <Icon className={iconCls} />
+
+        <button
+          type="button"
+          id={id}
+          ref={triggerRef}
+          onClick={() => (open ? setOpen(false) : openPanel())}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          className={
+            inputBase + " pr-10 text-left " +
+            (open ? "ring-4 ring-yellow-600/20 " : "") +
+            (value ? "text-black" : "text-yellow-600")
+          }
+        >
+          <span className="block truncate">{value || placeholder}</span>
+        </button>
+
+        <ChevronDownIcon
+          className={
+            "pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-yellow-600 transition-transform duration-200 " +
+            (open ? "rotate-180" : "")
+          }
+        />
+
+        {/* keeps the browser's "required" validation working */}
+        <input
+          tabIndex={-1}
+          aria-hidden="true"
+          required
+          value={value}
+          onChange={() => {}}
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px w-full opacity-0"
+        />
+
+        {open && (
+          <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-xl border border-yellow-600 bg-white shadow-2xl">
+            {searchable && (
+              <div className="relative border-b border-yellow-600/30 p-2">
+                <MagnifyingGlassIcon className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-yellow-600" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => { setQuery(e.target.value); setActive(0); }}
+                  placeholder="Search"
+                  aria-label={`Search ${label}`}
+                  className="w-full rounded-lg bg-gray-50 py-2 pl-9 pr-3 text-sm text-black placeholder-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-600/30"
+                />
+              </div>
+            )}
+
+            <ul ref={listRef} role="listbox" aria-label={label} className="max-h-60 overflow-y-auto py-1">
+              {filtered.length === 0 && (
+                <li className="px-4 py-3 text-sm text-gray-500">No results</li>
+              )}
+              {filtered.map((opt, i) => (
+                <li
+                  key={`${opt}-${i}`}
+                  role="option"
+                  aria-selected={opt === value}
+                  onMouseEnter={() => setActive(i)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => choose(opt)}
+                  className={
+                    "flex cursor-pointer items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors " +
+                    (i === active ? "bg-yellow-600/10 " : "") +
+                    (opt === value ? "font-semibold text-red-800" : "text-gray-800")
+                  }
+                >
+                  <span>{opt}</span>
+                  {opt === value && <CheckIcon className="h-4 w-4 shrink-0 text-red-800" />}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Regone = () => {
   const [formData, setFormData] = useState({
@@ -98,15 +235,15 @@ const Regone = () => {
           </p>
         </div>
 
-        <div className="relative rg-rise-2 max-w-6xl mx-auto grid lg:grid-cols-5 gap-8 items-start">
+        <div className="relative rg-rise-2 max-w-6xl mx-auto grid lg:grid-cols-5 gap-8 items-stretch">
 
           {/* ---------- Left: image + info card ---------- */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="relative overflow-hidden rounded-2xl shadow-xl">
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <div className="relative shrink-0 overflow-hidden rounded-2xl shadow-xl">
               <img
                 src="./image/s23.jpg"
                 alt="Banner"
-                className="w-full h-96 object-cover object-top"
+                className="w-full h-80 object-cover object-top"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-red-900/85 via-transparent to-transparent" />
               <p className="absolute bottom-5 left-6 right-6 text-white text-xl font-bold leading-snug">
@@ -114,7 +251,7 @@ const Regone = () => {
               </p>
             </div>
 
-            <div className="relative overflow-hidden bg-red-900 text-white rounded-2xl shadow-xl p-8">
+            <div className="relative flex-1 overflow-hidden bg-red-900 text-white rounded-2xl shadow-xl p-8">
               <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
               <div className="pointer-events-none absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-yellow-600/10" />
               <h3 className="relative text-xl font-bold mb-6">Why we ask</h3>
@@ -135,11 +272,11 @@ const Regone = () => {
           </div>
 
           {/* ---------- Right: form card ---------- */}
-          <div className="lg:col-span-3 bg-white rounded-2xl shadow-xl border-t-4 border-red-900 p-8 md:p-10">
+          <div className="lg:col-span-3 flex flex-col bg-white rounded-2xl shadow-xl border-t-4 border-red-900 p-8 md:p-10">
             <h2 className="text-2xl font-bold text-gray-900">Your details</h2>
             <p className="mt-1 mb-8 text-gray-600">Fields marked with * are required.</p>
 
-            <form className="space-y-6">
+            <form className="flex flex-1 flex-col gap-6">
               <div className="grid sm:grid-cols-2 gap-6">
                 {/* Date of Birth */}
                 <div>
@@ -159,7 +296,7 @@ const Regone = () => {
                 </div>
 
                 {/* Marital Status */}
-                <SelectField
+                <Dropdown
                   id="maritalStatus"
                   label="Marital Status"
                   icon={HeartIcon}
@@ -171,7 +308,7 @@ const Regone = () => {
                 />
 
                 {/* Mother Tongue */}
-                <SelectField
+                <Dropdown
                   id="motherTongue"
                   label="Mother Tongue"
                   icon={ChatBubbleLeftRightIcon}
@@ -183,7 +320,7 @@ const Regone = () => {
                 />
 
                 {/* Religion */}
-                <SelectField
+                <Dropdown
                   id="religion"
                   label="Religion"
                   icon={SparklesIcon}
@@ -195,7 +332,7 @@ const Regone = () => {
                 />
 
                 {/* Caste */}
-                <SelectField
+                <Dropdown
                   id="caste"
                   label="Caste"
                   icon={UsersIcon}
@@ -253,7 +390,7 @@ const Regone = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-red-900 text-white font-semibold tracking-wide py-4 rounded-xl shadow-lg
+                className="mt-auto w-full flex items-center justify-center gap-2 bg-red-900 text-white font-semibold tracking-wide py-4 rounded-xl shadow-lg
                            hover:bg-red-700 hover:shadow-xl active:scale-[0.99] transition duration-200
                            focus:outline-none focus-visible:ring-4 focus-visible:ring-red-800/30"
               >
