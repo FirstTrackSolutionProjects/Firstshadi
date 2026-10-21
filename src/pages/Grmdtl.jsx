@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiUser, FiPhone, FiCalendar, FiLock, FiHeart, FiEye, FiEyeOff, FiArrowRight, FiAlertCircle, FiChevronDown } from 'react-icons/fi';
+import {
+  FiUser, FiPhone, FiCalendar, FiLock, FiHeart, FiEye, FiEyeOff,
+  FiArrowRight, FiAlertCircle, FiChevronDown, FiCheck,
+} from 'react-icons/fi';
 import Footer from '../components/Footer';
 
 /* ------------------------------ SHARED STYLES ------------------------------ */
 
 const inputBase =
-  'w-full py-3 rounded-xl border bg-slate-50 text-slate-800 placeholder-slate-400 transition ' +
-  'focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-500 focus:bg-white';
-const inputOk = 'border-slate-200';
-const inputBad = 'border-red-400 bg-red-50/40';
+  'w-full py-3.5 rounded-xl border bg-white text-slate-800 placeholder-slate-400 shadow-sm transition ' +
+  'focus:outline-none focus:ring-4 focus:ring-amber-100 focus:border-amber-500';
+const inputOk = 'border-slate-200 hover:border-slate-300';
+const inputBad = 'border-red-400 bg-red-50/40 focus:ring-red-100 focus:border-red-400';
 
 /* ------------------------------ SMALL PARTS ------------------------------ */
 
@@ -28,15 +31,18 @@ const Field = ({ label, children, error }) => (
 );
 
 const IconWrap = ({ icon }) => (
-  <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-lg text-amber-600">
+  <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-lg text-amber-600">
     {icon}
   </span>
 );
 
-const SectionTitle = ({ children }) => (
-  <div className="flex items-center gap-3 pt-2">
-    <span className="text-xs font-bold uppercase tracking-wider text-amber-700">{children}</span>
-    <span className="h-px flex-1 bg-gradient-to-r from-amber-200 to-transparent" />
+const SectionTitle = ({ number, children }) => (
+  <div className="flex items-center gap-3 pt-3">
+    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-red-800 to-red-600 text-xs font-bold text-white shadow">
+      {number}
+    </span>
+    <span className="text-sm font-bold text-slate-800">{children}</span>
+    <span className="h-px flex-1 bg-gradient-to-r from-amber-300 to-transparent" />
   </div>
 );
 
@@ -52,6 +58,11 @@ const strengthOf = (pw) => {
 
 const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Good', 'Strong'];
 const STRENGTH_COLORS = ['', 'bg-red-500', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+
+const GENDERS = [
+  { value: 'male', label: 'Male', emoji: '👨' },
+  { value: 'female', label: 'Female', emoji: '👩' },
+];
 
 /* ------------------------------ PAGE ------------------------------ */
 
@@ -78,32 +89,41 @@ const Grmdtl = () => {
 
   return (
     <div>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 via-white to-amber-50 px-4 py-10">
-        <div className="w-full max-w-xl bg-white rounded-3xl shadow-2xl shadow-red-100 overflow-hidden">
-          {/* 🖼️ Banner image */}
-          <div className="relative h-56 sm:h-72">
-            <img
-              src="/image/s17.jpg"
-              alt="Groom Banner"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-red-950/75 via-red-900/10 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur text-xs font-semibold">
-                <FiHeart /> Create your account
-              </span>
+      <div className="relative overflow-hidden bg-gradient-to-br from-rose-50 via-white to-amber-50 px-4 py-10 sm:py-14">
+        <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-rose-200/50 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-amber-200/50 blur-3xl" />
+
+        <div className="relative mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 items-start">
+          {/* LEFT: heading + full photo (koi crop nahi) */}
+          <div className="lg:sticky lg:top-8 text-center lg:text-left">
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-red-100 text-red-800 text-xs font-bold">
+              <FiHeart /> CREATE YOUR ACCOUNT
+            </span>
+            <h1 className="mt-4 text-3xl sm:text-4xl font-extrabold leading-tight text-red-700">
+              Hi! You are joining the Best Matchmaking Experience.
+            </h1>
+            <p className="mt-3 text-gray-600">Fill in your details to get started.</p>
+
+            <div className="relative mt-8 mx-auto max-w-lg lg:max-w-none">
+              {/* decorative frame */}
+              <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-red-700 via-rose-500 to-amber-400 opacity-70 blur-sm" />
+              <div className="relative overflow-hidden rounded-[1.6rem] ring-4 ring-white shadow-2xl">
+                <img
+                  src="/image/s17.jpg"
+                  alt="Groom Banner"
+                  className="block w-full h-auto"
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-red-950/50 to-transparent" />
+              </div>
             </div>
           </div>
 
-          {/* 📋 Form */}
-          <div className="p-6 sm:p-10">
-            <h2 className="text-xl sm:text-2xl text-red-700 font-bold text-center leading-snug">
-              Hi! You are joining the Best Matchmaking Experience.
-            </h2>
-            <p className="text-center text-sm text-gray-500 mt-1.5">Fill in your details to get started.</p>
+          {/* RIGHT: FORM CARD */}
+          <div className="bg-white rounded-3xl shadow-2xl shadow-red-100 overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-red-900 via-rose-500 to-amber-400" />
 
-            <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-              <SectionTitle>Personal details</SectionTitle>
+            <form className="p-6 sm:p-9 space-y-5" onSubmit={handleSubmit} autoComplete="on">
+              <SectionTitle number="1">Personal details</SectionTitle>
 
               {/* Groom's Title + Name */}
               <Field label="Name">
@@ -126,8 +146,9 @@ const Grmdtl = () => {
                     <input
                       type="text"
                       name="name"
+                      autoComplete="name"
                       placeholder="Enter the Name"
-                      className={`${inputBase} ${inputOk} pl-11 pr-3`}
+                      className={`${inputBase} ${inputOk} pl-12 pr-3`}
                       required
                     />
                   </div>
@@ -137,14 +158,15 @@ const Grmdtl = () => {
               {/* Gender Selection */}
               <Field label="Gender">
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { value: 'male', label: 'Male' },
-                    { value: 'female', label: 'Female' },
-                  ].map((g) => (
-                    <label key={g.value} className="cursor-pointer">
+                  {GENDERS.map((g) => (
+                    <label key={g.value} className="relative block cursor-pointer">
                       <input type="radio" name="gender" value={g.value} className="peer sr-only" required />
-                      <span className="flex items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-slate-50 py-3 text-sm font-semibold text-red-800 transition hover:border-amber-300 peer-checked:border-red-800 peer-checked:bg-red-50 peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-amber-400">
+                      <span className="flex items-center justify-center gap-2.5 rounded-xl border-2 border-slate-200 bg-white py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-amber-300 peer-checked:border-red-800 peer-checked:bg-red-50 peer-checked:text-red-800 peer-focus-visible:ring-4 peer-focus-visible:ring-amber-100">
+                        <span className="text-xl leading-none" aria-hidden="true">{g.emoji}</span>
                         {g.label}
+                      </span>
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden h-5 w-5 items-center justify-center rounded-full bg-red-800 text-white peer-checked:flex">
+                        <FiCheck className="text-xs" />
                       </span>
                     </label>
                   ))}
@@ -159,7 +181,8 @@ const Grmdtl = () => {
                     type="date"
                     name="dob"
                     max={today}
-                    className={`${inputBase} ${inputOk} pl-11 pr-3`}
+                    autoComplete="bday"
+                    className={`${inputBase} ${inputOk} pl-12 pr-3`}
                     required
                   />
                 </div>
@@ -172,7 +195,7 @@ const Grmdtl = () => {
                   <select
                     name="maritalStatus"
                     defaultValue=""
-                    className={`${inputBase} ${inputOk} pl-11 pr-10 appearance-none`}
+                    className={`${inputBase} ${inputOk} pl-12 pr-10 appearance-none`}
                     required
                   >
                     <option value="">Select Marital Status</option>
@@ -181,13 +204,13 @@ const Grmdtl = () => {
                     <option value="Widowed">Widowed</option>
                     <option value="Separated">Separated</option>
                   </select>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
                     <FiChevronDown />
                   </span>
                 </div>
               </Field>
 
-              <SectionTitle>Contact</SectionTitle>
+              <SectionTitle number="2">Contact</SectionTitle>
 
               {/* Mobile Number */}
               <Field label="Mobile Number">
@@ -196,18 +219,23 @@ const Grmdtl = () => {
                   <input
                     type="tel"
                     name="mobile"
+                    autoComplete="tel-national"
                     placeholder="Enter Mobile Number"
                     pattern="[0-9]{10}"
                     maxLength={10}
                     inputMode="numeric"
                     title="Enter a 10-digit mobile number"
-                    className={`${inputBase} ${inputOk} pl-11 pr-3`}
+                    onInput={(e) => {
+                      // sirf digits allow (email/text autofill ho jaye to hat jaye)
+                      e.target.value = e.target.value.replace(/\D/g, '');
+                    }}
+                    className={`${inputBase} ${inputOk} pl-12 pr-3`}
                     required
                   />
                 </div>
               </Field>
 
-              <SectionTitle>Account security</SectionTitle>
+              <SectionTitle number="3">Account security</SectionTitle>
 
               {/* Create Password */}
               <Field label="Create Password">
@@ -216,27 +244,28 @@ const Grmdtl = () => {
                   <input
                     type={showPw ? 'text' : 'password'}
                     name="password"
+                    autoComplete="new-password"
                     placeholder="Enter Password"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
                       setMismatch(false);
                     }}
-                    className={`${inputBase} ${inputOk} pl-11 pr-11`}
+                    className={`${inputBase} ${inputOk} pl-12 pr-12`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPw((v) => !v)}
                     aria-label={showPw ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-red-700 transition"
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-red-700 transition"
                   >
                     {showPw ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
 
                 {password && (
-                  <div className="mt-2">
+                  <div className="mt-2.5">
                     <div className="grid grid-cols-4 gap-1.5">
                       {[1, 2, 3, 4].map((n) => (
                         <span
@@ -259,20 +288,21 @@ const Grmdtl = () => {
                   <input
                     type={showConfirm ? 'text' : 'password'}
                     name="confirmPassword"
+                    autoComplete="new-password"
                     placeholder="Re-enter Password"
                     value={confirm}
                     onChange={(e) => {
                       setConfirm(e.target.value);
                       setMismatch(false);
                     }}
-                    className={`${inputBase} ${mismatch ? inputBad : inputOk} pl-11 pr-11`}
+                    className={`${inputBase} ${mismatch ? inputBad : inputOk} pl-12 pr-12`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm((v) => !v)}
                     aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-red-700 transition"
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-red-700 transition"
                   >
                     {showConfirm ? <FiEyeOff /> : <FiEye />}
                   </button>
@@ -282,7 +312,7 @@ const Grmdtl = () => {
               {/* Continue Button */}
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-900 to-red-700 text-white py-3.5 rounded-xl font-semibold shadow-lg shadow-red-200 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-900 via-red-800 to-red-600 text-white py-4 rounded-xl text-base font-bold shadow-lg shadow-red-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
               >
                 Continue <FiArrowRight />
               </button>
