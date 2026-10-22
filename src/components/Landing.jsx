@@ -406,9 +406,13 @@ const Landing = () => {
           background-size: 200% auto;
           -webkit-background-clip: text;
           background-clip: text;
-          color: transparent;
+                    color: transparent;
           animation: fmShimmer 6s linear infinite;
         }
+        @keyframes fmSlideIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fmProgress { from { width: 0%; } to { width: 100%; } }
+        .fm-slide-in { animation: fmSlideIn .6s ease-out both; }
+        .fm-progress { animation: fmProgress 6s linear both; }
       `}</style>
 
       {/* ==================== HERO ==================== */}
@@ -746,78 +750,135 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ==================== TESTIMONIALS ==================== */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-4">
+            {/* ==================== TESTIMONIALS ==================== */}
+      <section className="relative overflow-hidden py-24 px-4 bg-white">
+        {/* background glows */}
+        <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-rose-100/60 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#e0b46a]/10 blur-3xl" />
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-5 shadow-sm">
+              <IconHeart className="w-3 h-3" />
               Success Stories
             </span>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Real Couples, Real <span className="italic text-rose-800">Journeys</span>
             </h2>
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className="h-px w-14 bg-gradient-to-r from-transparent to-[#e0b46a]" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#e0b46a]" />
+              <span className="h-px w-14 bg-gradient-to-l from-transparent to-[#e0b46a]" />
+            </div>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Real stories from real couples who found love on First Marriage.
             </p>
           </div>
 
           <div className="relative max-w-4xl mx-auto">
-            <div className="bg-[#faf7f5] border border-gray-200 rounded-2xl p-8 md:p-12">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-shrink-0">
-                  <img
-                    src={testimonials[currentTestimonial].image}
-                    alt={testimonials[currentTestimonial].name}
-                    className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-4 border-white shadow-lg"
-                    onError={(e) => { e.target.src = 'https://placehold.co/200x200/9f1239/ffffff?text=%E2%9D%A4'; }}
-                  />
-                </div>
-                <div className="flex-grow text-center md:text-left">
-                  <div className="flex justify-center md:justify-start gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <IconStar key={i} className="w-5 h-5 text-amber-500" />
-                    ))}
+            {/* main card */}
+            <div className="relative overflow-hidden rounded-3xl border border-rose-100 bg-[#faf7f5] shadow-2xl shadow-rose-100/60">
+              {/* top accent line */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800" />
+
+              {/* big decorative quote */}
+              <span className="pointer-events-none absolute right-8 top-2 select-none font-display text-[10rem] leading-none text-rose-100">
+                ”
+              </span>
+              <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-rose-100/70 blur-3xl" />
+
+              <div key={currentTestimonial} className="fm-slide-in relative p-8 md:p-12">
+                <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                  {/* photo with ring + glow */}
+                  <div className="relative flex-shrink-0">
+                    <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-rose-800/40 via-[#e0b46a]/40 to-rose-800/40 blur-xl" />
+                    <div className="relative rounded-full bg-gradient-to-br from-rose-800 via-[#e0b46a] to-rose-800 p-1.5">
+                      <img
+                        src={testimonials[currentTestimonial].image}
+                        alt={testimonials[currentTestimonial].name}
+                        className="h-36 w-36 md:h-44 md:w-44 rounded-full border-4 border-white object-cover"
+                        onError={(e) => { e.target.src = 'https://placehold.co/200x200/9f1239/ffffff?text=%E2%9D%A4'; }}
+                      />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 flex h-11 w-11 items-center justify-center rounded-full bg-rose-800 text-white shadow-lg ring-4 ring-[#faf7f5]">
+                      <IconHeart className="w-5 h-5" />
+                    </div>
                   </div>
-                  <p className="text-gray-700 text-lg leading-relaxed mb-6 italic font-display">
-                    “{testimonials[currentTestimonial].text}”
-                  </p>
-                  <div>
-                    <p className="text-gray-900 font-bold text-lg">{testimonials[currentTestimonial].name}</p>
-                    <p className="text-rose-800 text-sm">{testimonials[currentTestimonial].location}</p>
+
+                  {/* text */}
+                  <div className="flex-grow text-center md:text-left">
+                    <div className="mb-4 flex justify-center md:justify-start gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <IconStar key={i} className="w-5 h-5 text-amber-500" />
+                      ))}
+                    </div>
+                    <p className="font-display text-xl md:text-2xl italic leading-relaxed text-gray-800 mb-6">
+                      “{testimonials[currentTestimonial].text}”
+                    </p>
+                    <div className="flex flex-col items-center gap-2 md:items-start">
+                      <p className="text-lg font-bold text-gray-900">{testimonials[currentTestimonial].name}</p>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-100 bg-white px-3 py-1 text-xs font-semibold text-rose-800 shadow-sm">
+                        <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                        {testimonials[currentTestimonial].location}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* auto-slide progress bar */}
+              <div className="h-1 w-full bg-rose-100">
+                <div key={currentTestimonial} className="fm-progress h-full bg-gradient-to-r from-rose-800 to-[#e0b46a]" />
               </div>
             </div>
 
-            <div className="flex justify-center gap-4 mt-8">
-              <button
-                onClick={prevTestimonial}
-                className="w-10 h-10 rounded-full border border-gray-300 hover:border-rose-800 hover:text-rose-800 flex items-center justify-center text-gray-600 transition-colors"
-                aria-label="Previous testimonial"
-              >
-                <IconChevronLeft />
-              </button>
+            {/* controls + thumbnails */}
+            <div className="mt-8 flex flex-col items-center gap-6">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={prevTestimonial}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm transition-all hover:-translate-x-0.5 hover:border-rose-800 hover:bg-rose-800 hover:text-white hover:shadow-lg"
+                  aria-label="Previous testimonial"
+                >
+                  <IconChevronLeft />
+                </button>
 
-              <div className="flex items-center gap-2">
-                {testimonials.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentTestimonial(i)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      i === currentTestimonial ? 'w-8 bg-rose-800' : 'w-2 bg-gray-300 hover:bg-gray-400'
-                    }`}
-                    aria-label={`Go to testimonial ${i + 1}`}
-                  />
-                ))}
+                <div className="flex items-center gap-3">
+                  {testimonials.map((t, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentTestimonial(i)}
+                      className={`relative rounded-full transition-all duration-300 ${
+                        i === currentTestimonial
+                          ? 'scale-110 ring-2 ring-rose-800 ring-offset-2'
+                          : 'opacity-50 hover:opacity-100 hover:scale-105'
+                      }`}
+                      aria-label={`Go to testimonial ${i + 1}`}
+                    >
+                      <img
+                        src={t.image}
+                        alt={t.name}
+                        className="h-12 w-12 rounded-full object-cover"
+                        onError={(e) => { e.target.src = 'https://placehold.co/100x100/9f1239/ffffff?text=%E2%9D%A4'; }}
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={nextTestimonial}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm transition-all hover:translate-x-0.5 hover:border-rose-800 hover:bg-rose-800 hover:text-white hover:shadow-lg"
+                  aria-label="Next testimonial"
+                >
+                  <IconChevronRight />
+                </button>
               </div>
 
-              <button
-                onClick={nextTestimonial}
-                className="w-10 h-10 rounded-full border border-gray-300 hover:border-rose-800 hover:text-rose-800 flex items-center justify-center text-gray-600 transition-colors"
-                aria-label="Next testimonial"
-              >
-                <IconChevronRight />
-              </button>
+              <p className="text-xs font-medium tracking-widest text-gray-400">
+                {String(currentTestimonial + 1).padStart(2, '0')} / {String(testimonials.length).padStart(2, '0')}
+              </p>
             </div>
           </div>
         </div>
