@@ -267,19 +267,42 @@ const SelectField = ({ placeholder, value, onChange, options, className = "" }) 
   );
 };
 
-const FAQItem = ({ faq, isOpen, onToggle }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden bg-white hover:border-rose-200 transition-colors">
-    <button
-      onClick={onToggle}
-      className="w-full flex items-center justify-between p-5 text-left"
-    >
-      <span className="text-gray-900 font-semibold text-sm sm:text-base pr-4">{faq.question}</span>
-      <div className={`flex-shrink-0 w-7 h-7 rounded-full bg-rose-50 flex items-center justify-center text-rose-800 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-        <IconChevronDown />
-      </div>
+const FAQItem = ({ faq, index, isOpen, onToggle }) => (
+  <div
+    className={`relative overflow-hidden rounded-2xl border bg-white transition-all duration-300 ${
+      isOpen
+        ? 'border-rose-200 shadow-xl shadow-rose-100'
+        : 'border-gray-200 hover:border-rose-200 hover:shadow-md'
+    }`}
+  >
+    <div
+      className={`absolute left-0 top-0 h-full w-1 origin-top bg-gradient-to-b from-rose-800 to-[#e0b46a] transition-transform duration-300 ${
+        isOpen ? 'scale-y-100' : 'scale-y-0'
+      }`}
+    />
+    <button onClick={onToggle} className="flex w-full items-center gap-4 p-5 text-left">
+      <span
+        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold tracking-wider transition-colors duration-300 ${
+          isOpen ? 'bg-rose-800 text-white' : 'bg-rose-50 text-rose-800'
+        }`}
+      >
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <span className={`flex-1 text-sm font-semibold sm:text-base ${isOpen ? 'text-rose-800' : 'text-gray-900'}`}>
+        {faq.question}
+      </span>
+      <span
+        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+          isOpen ? 'rotate-45 bg-rose-800 text-white' : 'bg-rose-50 text-rose-800'
+        }`}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+        </svg>
+      </span>
     </button>
     <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96' : 'max-h-0'}`}>
-      <div className="px-5 pb-5 text-gray-600 text-sm leading-relaxed">
+      <div className="px-5 pb-6 pl-[4.25rem] pr-6 text-sm leading-relaxed text-gray-600">
         {faq.answer}
       </div>
     </div>
@@ -1037,70 +1060,122 @@ const Landing = () => {
           </div>
         </div>
       </section>
-      {/* ==================== UPCOMING ==================== */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold tracking-wider uppercase mb-4">
+           {/* ==================== UPCOMING ==================== */}
+      <section className="relative overflow-hidden py-24 px-4 bg-white">
+        <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-rose-100/60 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-[#e0b46a]/10 blur-3xl" />
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold tracking-wider uppercase mb-5 shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+              </span>
               Coming Soon
             </span>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Exciting <span className="italic text-rose-800">Updates</span>
             </h2>
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className="h-px w-14 bg-gradient-to-r from-transparent to-[#e0b46a]" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#e0b46a]" />
+              <span className="h-px w-14 bg-gradient-to-l from-transparent to-[#e0b46a]" />
+            </div>
             <p className="text-gray-600 max-w-2xl mx-auto">
               We're constantly improving to make your matchmaking journey even better.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {upcomingFeatures.map((feature, index) => (
-              <div
-                key={index}
-                className="bg-[#faf7f5] border border-gray-200 hover:border-rose-200 rounded-2xl p-6 text-center transition-colors"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm">{feature.description}</p>
-              </div>
-            ))}
+            {upcomingFeatures.map((feature, index) => {
+              const upIcons = [
+                <IconSparkle className="w-7 h-7" />,
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                </svg>,
+                <IconStar className="w-7 h-7" />,
+                <IconArrowUp className="w-7 h-7" />,
+              ];
+              return (
+                <div
+                  key={index}
+                  className="group relative overflow-hidden rounded-2xl border border-dashed border-rose-200 bg-[#faf7f5] p-7 text-center transition-all duration-500 hover:-translate-y-2 hover:border-solid hover:border-rose-800 hover:bg-gradient-to-br hover:from-rose-800 hover:to-rose-900 hover:shadow-2xl hover:shadow-rose-200"
+                >
+                  <span className="absolute right-4 top-4 rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800 transition-colors duration-500 group-hover:bg-white/20 group-hover:text-[#f3d79e]">
+                    Soon
+                  </span>
+                  <div className="pointer-events-none absolute -bottom-12 -right-12 h-32 w-32 rounded-full bg-[#e0b46a]/0 blur-2xl transition-all duration-500 group-hover:bg-[#e0b46a]/30" />
+
+                  <div className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-rose-800 shadow-md ring-1 ring-rose-100 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110 group-hover:bg-white/15 group-hover:text-[#f3d79e] group-hover:ring-white/30">
+                    {upIcons[index]}
+                  </div>
+                  <h3 className="relative mb-2 text-lg font-semibold text-gray-900 transition-colors duration-500 group-hover:text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="relative text-sm leading-relaxed text-gray-600 transition-colors duration-500 group-hover:text-white/80">
+                    {feature.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ==================== FAQ ==================== */}
-      <section className="py-20 px-4 bg-[#faf7f5]">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-4">
+      <section className="relative overflow-hidden py-24 px-4 bg-[#faf7f5]">
+        <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-rose-100/70 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#e0b46a]/15 blur-3xl" />
+
+        <div className="relative max-w-6xl mx-auto grid gap-12 lg:grid-cols-[340px_1fr] lg:gap-16">
+          {/* left: heading + contact card */}
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-5 shadow-sm">
+              <IconChat className="w-3 h-3" />
               Got Questions?
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Frequently Asked <span className="italic text-rose-800">Questions</span>
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Everything you need to know about First Marriage.
-            </p>
+            <div className="flex items-center gap-3 mb-5">
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#e0b46a]" />
+              <span className="h-px w-20 bg-gradient-to-r from-[#e0b46a] to-transparent" />
+            </div>
+            <p className="text-gray-600 mb-8">Everything you need to know about First Marriage.</p>
+
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-800 to-rose-900 p-6 text-white shadow-2xl shadow-rose-200">
+              <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-[#e0b46a]/25 blur-3xl" />
+              <div className="relative">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 text-[#f3d79e] ring-1 ring-white/30">
+                  <IconPhone className="w-6 h-6" />
+                </div>
+                <p className="font-display text-xl font-bold">Still have questions?</p>
+                <p className="mt-1 mb-5 text-sm text-white/75">
+                  Our support team is happy to help you anytime.
+                </p>
+                <button
+                  onClick={() => navigate('/contact')}
+                  className="group/btn inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-rose-800 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-50"
+                >
+                  Contact Support
+                  <IconArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-3">
+          {/* right: accordion */}
+          <div className="space-y-4">
             {faqs.map((faq, index) => (
               <FAQItem
                 key={index}
                 faq={faq}
+                index={index}
                 isOpen={openFAQ === index}
                 onToggle={() => setOpenFAQ(openFAQ === index ? null : index)}
               />
             ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <p className="text-gray-600 mb-4">Still have questions?</p>
-            <button
-              onClick={() => navigate('/contact')}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-rose-800 hover:bg-rose-900 text-white font-semibold rounded-lg transition-colors"
-            >
-              Contact Support
-              <IconArrowRight />
-            </button>
           </div>
         </div>
       </section>
