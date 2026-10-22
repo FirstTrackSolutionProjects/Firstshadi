@@ -165,7 +165,7 @@ const IconArrowUp = ({ className = "w-5 h-5" }) => (
 const SelectField = ({ placeholder, value, onChange, options, className = "" }) => (
   <div className={`relative ${className}`}>
     <select
-      className="w-full appearance-none bg-white border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:border-rose-800 focus:ring-1 focus:ring-rose-800 transition-colors pl-4 pr-10 py-3 cursor-pointer"
+            className="w-full appearance-none bg-gray-50/70 hover:bg-white border border-gray-200 hover:border-rose-300 rounded-xl text-gray-800 text-sm focus:outline-none focus:bg-white focus:border-rose-800 focus:ring-2 focus:ring-rose-800/20 transition-all pl-4 pr-10 py-3.5 cursor-pointer"
       value={value}
       onChange={onChange}
     >
@@ -302,7 +302,25 @@ const Landing = () => {
   ];
 
   return (
-    <div className="w-full bg-white">
+        <div className="w-full bg-white">
+      <style>{`
+        @keyframes fmFadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fmFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+        @keyframes fmShimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        .fm-fade-up { animation: fmFadeUp .8s ease-out both; }
+        .fm-d1 { animation-delay: .1s; }
+        .fm-d2 { animation-delay: .22s; }
+        .fm-d3 { animation-delay: .35s; }
+        .fm-float { animation: fmFloat 7s ease-in-out infinite; }
+        .fm-shimmer {
+          background-image: linear-gradient(90deg, #e0b46a 0%, #f3d79e 45%, #e0b46a 90%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: fmShimmer 6s linear infinite;
+        }
+      `}</style>
 
       {/* ==================== HERO ==================== */}
       <section className="relative w-full min-h-[92vh] flex items-center justify-center overflow-hidden bg-[#2b0a12]">
@@ -314,14 +332,15 @@ const Landing = () => {
         />
         <div className="absolute inset-0 bg-black/60" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#3b0a18]/70 via-black/60 to-black/80" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.55)_100%)]" />
-
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.55)_100%)]" />
+        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-rose-800/30 blur-3xl fm-float" />
+        <div className="absolute bottom-0 -right-24 h-96 w-96 rounded-full bg-[#e0b46a]/10 blur-3xl fm-float" style={{ animationDelay: '2s' }} />
         {/* Content */}
         <div className="relative z-10 w-full max-w-5xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
 
           {/* Trust ribbon */}
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm px-4 py-1.5">
+                    <div className="flex justify-center mb-6 fm-fade-up">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-5 py-2 shadow-lg shadow-black/20 transition hover:bg-white/15">
               <IconShield className="w-4 h-4 text-amber-300" />
               <span className="text-[13px] font-medium tracking-wide text-white/90">
                 India's Most Trusted Matrimony Service
@@ -330,39 +349,46 @@ const Landing = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="text-center font-display leading-[1.05] tracking-tight">
-            <span className="block text-white text-4xl sm:text-5xl md:text-6xl font-bold">
+                    <h1 className="text-center font-display leading-[1.05] tracking-tight fm-fade-up fm-d1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+            <span className="block text-white text-4xl sm:text-5xl md:text-7xl font-bold">
               Find Your
             </span>
-            <span className="block mt-1 text-[#e0b46a] text-4xl sm:text-5xl md:text-6xl font-bold italic">
+            <span className="block mt-1 fm-shimmer text-4xl sm:text-5xl md:text-7xl font-bold italic">
               Perfect Life Partner
             </span>
           </h1>
 
-          <p className="mt-6 text-center text-white/80 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          <div className="mt-6 flex items-center justify-center gap-3 fm-fade-up fm-d2">
+            <span className="h-px w-16 bg-gradient-to-r from-transparent to-[#e0b46a]/70" />
+            <IconHeart className="w-4 h-4 text-[#e0b46a]" />
+            <span className="h-px w-16 bg-gradient-to-l from-transparent to-[#e0b46a]/70" />
+          </div>
+
+                   <p className="mt-5 text-center text-white/80 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed fm-fade-up fm-d2">
             Trusted by millions of Indian families. Verified profiles, secure conversations, and meaningful matches — all in one place.
           </p>
 
           {/* Search card */}
-          <form
+                   <form
             onSubmit={handleSearch}
-            className="mt-10 w-full bg-white rounded-xl shadow-2xl ring-1 ring-black/5 p-5 sm:p-6"
+            className="relative mt-10 w-full overflow-hidden rounded-2xl bg-white/95 backdrop-blur-xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/40 p-5 sm:p-7 fm-fade-up fm-d3"
           >
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800" />
             {/* Profile-for segmented control */}
-            <div className="flex flex-wrap items-center gap-2 mb-5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 mr-2">
+                       <div className="flex flex-wrap items-center gap-3 mb-6">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Profile for
               </span>
-              <div className="inline-flex flex-wrap rounded-lg border border-gray-200 overflow-hidden">
+              <div className="flex flex-wrap gap-2">
                 {profileForOptions.slice(0, 5).map((opt) => (
                   <button
                     key={opt}
                     type="button"
                     onClick={() => setProfileFor(opt)}
-                    className={`px-3.5 py-2 text-[13px] font-medium transition-colors border-r border-gray-200 last:border-r-0 ${
+                    className={`rounded-full border px-4 py-2 text-[13px] font-medium transition-all duration-200 ${
                       profileFor === opt
-                        ? 'bg-rose-800 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'border-rose-800 bg-rose-800 text-white shadow-md shadow-rose-800/30'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-rose-300 hover:text-rose-800'
                     }`}
                   >
                     {opt}
@@ -440,10 +466,11 @@ const Landing = () => {
               <div className="lg:col-span-1 flex items-end">
                 <button
                   type="submit"
-                  className="w-full inline-flex items-center justify-center gap-2 bg-rose-800 hover:bg-rose-900 text-white font-semibold text-sm py-3 px-5 rounded-lg transition-colors"
+                                   className="group w-full inline-flex items-center justify-center gap-2 bg-rose-800 hover:bg-rose-900 text-white font-semibold text-sm py-3.5 px-5 rounded-xl shadow-lg shadow-rose-800/30 hover:shadow-xl hover:shadow-rose-800/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                 >
                   <IconSearch className="w-4 h-4" />
                   Search
+                  <IconArrowRight className="w-4 h-4 -ml-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </button>
               </div>
             </div>
@@ -456,7 +483,11 @@ const Landing = () => {
                   key={tag}
                   type="button"
                   onClick={() => setReligion(tag)}
-                  className="text-xs font-medium text-gray-600 hover:text-rose-800 border border-gray-200 hover:border-rose-200 rounded-full px-3 py-1 transition-colors"
+                                   className={`text-xs font-medium rounded-full border px-3.5 py-1.5 transition-all duration-200 ${
+                    religion === tag
+                      ? 'border-rose-800 bg-rose-50 text-rose-800'
+                      : 'border-gray-200 text-gray-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-800'
+                  }`}
                 >
                   {tag}
                 </button>
@@ -465,9 +496,9 @@ const Landing = () => {
           </form>
 
           {/* Stats row */}
-          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-y-6 text-center">
+                    <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 text-center fm-fade-up fm-d3">
             {stats.map((s, i) => (
-              <div key={i} className="px-4 border-r border-white/10 last:border-r-0">
+              <div key={i} className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-4 transition duration-300 hover:-translate-y-1 hover:bg-white/10">
                 <div className="font-display text-2xl sm:text-3xl font-bold text-white">{s.value}</div>
                 <div className="mt-1 text-[11px] sm:text-xs font-medium uppercase tracking-wider text-white/60">
                   {s.label}
@@ -508,7 +539,7 @@ const Landing = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group bg-white border border-gray-200 hover:border-rose-200 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-rose-100"
+                                className="group bg-white border border-gray-200 hover:border-rose-200 rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-100"
               >
                 <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-800 mb-4 group-hover:bg-rose-800 group-hover:text-white transition-colors">
                   {feature.icon}
@@ -536,10 +567,11 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="hidden lg:block absolute top-8 left-[12%] right-[12%] border-t-2 border-dashed border-rose-200" />
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="relative flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-rose-800 flex items-center justify-center font-display text-white text-xl font-bold mb-4 shadow-lg shadow-rose-200">
+              <div key={index} className="relative flex flex-col items-center text-center group">
+                <div className="relative z-10 w-16 h-16 rounded-full bg-rose-800 flex items-center justify-center font-display text-white text-xl font-bold mb-4 shadow-lg shadow-rose-200 ring-4 ring-[#faf7f5] transition-transform duration-300 group-hover:scale-110">
                   {step.step}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
@@ -649,7 +681,7 @@ const Landing = () => {
                 className={`relative rounded-2xl p-6 sm:p-8 transition-all duration-300 ${
                   plan.highlighted
                     ? 'bg-rose-800 text-white shadow-2xl shadow-rose-200 md:scale-105'
-                    : 'bg-white border border-gray-200 hover:border-rose-200 hover:shadow-lg'
+                                       : 'bg-white border border-gray-200 hover:border-rose-200 hover:shadow-xl hover:-translate-y-1'
                 }`}
               >
                 {plan.highlighted && (
