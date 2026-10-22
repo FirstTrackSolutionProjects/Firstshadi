@@ -162,21 +162,110 @@ const IconArrowUp = ({ className = "w-5 h-5" }) => (
 // ============================================================
 //  REUSABLE
 // ============================================================
-const SelectField = ({ placeholder, value, onChange, options, className = "" }) => (
-  <div className={`relative ${className}`}>
-    <select
-            className="w-full appearance-none bg-gray-50/70 hover:bg-white border border-gray-200 hover:border-rose-300 rounded-xl text-gray-800 text-sm focus:outline-none focus:bg-white focus:border-rose-800 focus:ring-2 focus:ring-rose-800/20 transition-all pl-4 pr-10 py-3.5 cursor-pointer"
-      value={value}
-      onChange={onChange}
-    >
-      <option value="" disabled>{placeholder}</option>
-      {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-    </select>
-    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-      <IconChevronDown />
+const SelectField = ({ placeholder, value, onChange, options, className = "" }) => {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+  const listRef = useRef(null);
+
+  // Text options (gender, religion, language) can be reset; numeric age options cannot
+  const clearable = typeof options[0] !== 'number';
+  const hasValue = value !== '' && value !== null && value !== undefined && !Number.isNaN(value);
+
+  // Close on outside click / Escape
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  // Scroll the selected option into view when opened
+  useEffect(() => {
+    if (!open || !listRef.current) return;
+    const el = listRef.current.querySelector('[data-selected="true"]');
+    if (el) listRef.current.scrollTop = Math.max(el.offsetTop - 80, 0);
+  }, [open]);
+
+  const pick = (val) => {
+    onChange({ target: { value: val } });
+    setOpen(false);
+  };
+
+  return (
+    <div ref={wrapRef} className={`relative ${open ? 'z-50' : ''} ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={`flex w-full items-center justify-between rounded-xl border bg-gray-50/70 px-4 py-3.5 text-left text-sm transition-all hover:bg-white hover:border-rose-300 focus:outline-none ${
+          open ? 'border-rose-800 bg-white ring-2 ring-rose-800/20' : 'border-gray-200'
+        }`}
+      >
+        <span className={`truncate ${hasValue ? 'text-gray-800 font-medium' : 'text-gray-500'}`}>
+          {hasValue ? value : placeholder}
+        </span>
+        <IconChevronDown
+          className={`ml-2 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180 text-rose-800' : ''}`}
+        />
+      </button>
+
+      {open && (
+        <ul
+          ref={listRef}
+          role="listbox"
+          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-60 min-w-[140px] overflow-y-auto rounded-xl border border-gray-100 bg-white py-1.5 shadow-2xl ring-1 ring-black/5"
+          style={{ animation: 'fmFadeUp .18s ease-out both' }}
+        >
+          {clearable && (
+            <li>
+              <button
+                type="button"
+                onClick={() => pick('')}
+                className="w-full px-4 py-2 text-left text-sm text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-800"
+              >
+                {placeholder}
+              </button>
+            </li>
+          )}
+          {options.map((opt) => {
+            const selected = String(opt) === String(value);
+            return (
+              <li key={opt}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  data-selected={selected}
+                  onClick={() => pick(opt)}
+                  className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors ${
+                    selected
+                      ? 'bg-rose-800 font-semibold text-white'
+                      : 'text-gray-700 hover:bg-rose-50 hover:text-rose-800'
+                  }`}
+                >
+                  {opt}
+                  {selected && (
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 const FAQItem = ({ faq, isOpen, onToggle }) => (
   <div className="border border-gray-200 rounded-lg overflow-hidden bg-white hover:border-rose-200 transition-colors">
@@ -371,9 +460,9 @@ const Landing = () => {
           {/* Search card */}
                    <form
             onSubmit={handleSearch}
-            className="relative mt-10 w-full overflow-hidden rounded-2xl bg-white/95 backdrop-blur-xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/40 p-5 sm:p-7 fm-fade-up fm-d3"
+                       className="relative z-30 mt-10 w-full rounded-2xl bg-white/95 backdrop-blur-xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/40 p-5 sm:p-7 fm-fade-up fm-d3"
           >
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800" />
+            <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800" />
             {/* Profile-for segmented control */}
                        <div className="flex flex-wrap items-center gap-3 mb-6">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
