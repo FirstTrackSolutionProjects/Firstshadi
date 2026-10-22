@@ -609,16 +609,35 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ==================== FEATURES ==================== */}
-      <section ref={featuresRef} className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-4">
+           {/* ==================== FEATURES ==================== */}
+      <section ref={featuresRef} className="relative overflow-hidden py-24 px-4 bg-white">
+        {/* soft background glows */}
+        <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-rose-100/60 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-[#e0b46a]/10 blur-3xl" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: 'radial-gradient(#e5d5d9 1px, transparent 1px)',
+            backgroundSize: '26px 26px',
+            maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+          }}
+        />
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-5 shadow-sm">
+              <IconHeart className="w-3 h-3" />
               Why Choose Us
             </span>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               A Platform Built on <span className="italic text-rose-800">Trust</span>
             </h2>
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className="h-px w-14 bg-gradient-to-r from-transparent to-[#e0b46a]" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#e0b46a]" />
+              <span className="h-px w-14 bg-gradient-to-l from-transparent to-[#e0b46a]" />
+            </div>
             <p className="text-gray-600 max-w-2xl mx-auto">
               We provide a safe, secure, and trusted platform to help you find your perfect life partner.
             </p>
@@ -628,19 +647,40 @@ const Landing = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                                className="group bg-white border border-gray-200 hover:border-rose-200 rounded-2xl p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-rose-100"
+                className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-7 transition-all duration-500 hover:-translate-y-2 hover:border-rose-200 hover:shadow-2xl hover:shadow-rose-100"
               >
-                <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-800 mb-4 group-hover:bg-rose-800 group-hover:text-white transition-colors">
-                  {feature.icon}
+                {/* top accent line */}
+                <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800 transition-transform duration-500 group-hover:scale-x-100" />
+
+                {/* big faded number */}
+                <span className="absolute right-5 top-3 font-display text-6xl font-bold text-gray-100 transition-colors duration-500 group-hover:text-rose-100 select-none">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+
+                {/* corner glow */}
+                <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-rose-100/0 blur-2xl transition-all duration-500 group-hover:bg-rose-100/80" />
+
+                <div className="relative">
+                  <div className="relative mb-5 inline-flex">
+                    <div className="absolute inset-0 rounded-2xl bg-rose-800/30 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-50 to-rose-100 text-rose-800 ring-1 ring-rose-100 transition-all duration-500 group-hover:from-rose-800 group-hover:to-rose-900 group-hover:text-white group-hover:ring-rose-800 group-hover:rotate-6 group-hover:scale-110">
+                      {feature.icon}
+                    </div>
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+
+                  <div className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-rose-800 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+                    Learn more
+                    <IconArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
       {/* ==================== HOW IT WORKS ==================== */}
       <section className="py-20 px-4 bg-[#faf7f5]">
         <div className="max-w-6xl mx-auto">
@@ -656,7 +696,38 @@ const Landing = () => {
             </p>
           </div>
 
-                    <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="hidden lg:block absolute top-8 left-[12%] right-[12%] border-t-2 border-dashed border-rose-200" />
+            {howItWorksSteps.map((step, index) => (
+              <div key={index} className="relative flex flex-col items-center text-center group">
+                <div className="relative z-10 w-16 h-16 rounded-full bg-rose-800 flex items-center justify-center font-display text-white text-xl font-bold mb-4 shadow-lg shadow-rose-200 ring-4 ring-[#faf7f5] transition-transform duration-300 group-hover:scale-110">
+                  {step.step}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
+                <p className="text-gray-600 text-sm">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+            {/* ==================== HOW IT WORKS ==================== */}
+      <section className="py-20 px-4 bg-[#faf7f5]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="inline-block px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold tracking-wider uppercase mb-4">
+              Simple Process
+            </span>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              How It <span className="italic text-rose-800">Works</span>
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Your journey to finding your soulmate in four simple steps.
+            </p>
+          </div>
+
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="hidden lg:block absolute top-8 left-[12%] right-[12%] border-t-2 border-dashed border-rose-200" />
             {howItWorksSteps.map((step, index) => (
               <div key={index} className="relative flex flex-col items-center text-center group">
