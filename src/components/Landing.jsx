@@ -884,83 +884,159 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ==================== MEMBERSHIP ==================== */}
-      <section className="py-20 px-4 bg-[#faf7f5]">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-4">
+         {/* ==================== MEMBERSHIP ==================== */}
+      <section className="relative overflow-hidden py-24 px-4 bg-[#faf7f5]">
+        {/* background glows + dots */}
+        <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-rose-100/70 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#e0b46a]/15 blur-3xl" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: 'radial-gradient(#e5d5d9 1px, transparent 1px)',
+            backgroundSize: '26px 26px',
+            maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+          }}
+        />
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-rose-800 text-xs font-semibold tracking-wider uppercase mb-5 shadow-sm">
+              <IconStar className="w-3 h-3" />
               Membership
             </span>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Choose Your <span className="italic text-rose-800">Plan</span>
             </h2>
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className="h-px w-14 bg-gradient-to-r from-transparent to-[#e0b46a]" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#e0b46a]" />
+              <span className="h-px w-14 bg-gradient-to-l from-transparent to-[#e0b46a]" />
+            </div>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Flexible plans to suit every need. Upgrade anytime to unlock premium features.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            {membershipPlans.map((plan, index) => (
-              <div
-                key={index}
-                className={`relative rounded-2xl p-6 sm:p-8 transition-all duration-300 ${
-                  plan.highlighted
-                    ? 'bg-rose-800 text-white shadow-2xl shadow-rose-200 md:scale-105'
-                                       : 'bg-white border border-gray-200 hover:border-rose-200 hover:shadow-xl hover:-translate-y-1'
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-amber-400 text-rose-900 text-[11px] font-bold tracking-wider uppercase rounded-full">
-                    Most Popular
-                  </div>
-                )}
-
-                <div className="text-center mb-6">
-                  <h3 className={`font-display text-2xl font-bold mb-2 ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
-                    {plan.name}
-                  </h3>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className={`text-4xl font-extrabold ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
-                      {plan.price}
-                    </span>
-                    <span className={plan.highlighted ? 'text-white/70' : 'text-gray-500'}>
-                      /{plan.period}
-                    </span>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${
-                        plan.highlighted ? 'bg-white/20' : 'bg-rose-50'
-                      }`}>
-                        <IconCheck className={`w-4 h-4 ${plan.highlighted ? 'text-white' : 'text-rose-800'}`} />
-                      </div>
-                      <span className={`text-sm ${plan.highlighted ? 'text-white/90' : 'text-gray-700'}`}>
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => navigate(plan.route)}
-                  className={`w-full py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+            {membershipPlans.map((plan, index) => {
+              const planIcons = [
+                <IconUsers className="w-7 h-7" />,
+                <IconSparkle className="w-7 h-7" />,
+                <IconStar className="w-7 h-7" />,
+              ];
+              return (
+                <div
+                  key={index}
+                  className={`group relative flex flex-col overflow-hidden rounded-3xl p-8 transition-all duration-500 ${
                     plan.highlighted
-                      ? 'bg-white text-rose-800 hover:bg-gray-100'
-                      : 'bg-rose-800 text-white hover:bg-rose-900'
+                      ? 'bg-gradient-to-br from-rose-800 via-rose-800 to-rose-900 text-white shadow-2xl shadow-rose-300 ring-1 ring-[#e0b46a]/60 md:-my-4 md:py-12 hover:-translate-y-2'
+                      : 'border border-gray-200 bg-white hover:-translate-y-2 hover:border-rose-200 hover:shadow-2xl hover:shadow-rose-100'
                   }`}
                 >
-                  {plan.cta}
-                  <IconArrowRight />
-                </button>
-              </div>
-            ))}
+                  {/* top accent line */}
+                  <div
+                    className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800 transition-transform duration-500 ${
+                      plan.highlighted ? '' : 'origin-left scale-x-0 group-hover:scale-x-100'
+                    }`}
+                  />
+
+                  {/* decorative glows */}
+                  {plan.highlighted ? (
+                    <>
+                      <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-[#e0b46a]/25 blur-3xl" />
+                      <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+                    </>
+                  ) : (
+                    <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-rose-100/0 blur-2xl transition-all duration-500 group-hover:bg-rose-100/80" />
+                  )}
+
+                  {/* most popular ribbon */}
+                  {plan.highlighted && (
+                    <div className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-rose-900 shadow-lg">
+                      <IconStar className="w-3 h-3" />
+                      Most Popular
+                    </div>
+                  )}
+
+                  <div className="relative flex flex-1 flex-col">
+                    {/* icon badge */}
+                    <div
+                      className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110 ${
+                        plan.highlighted
+                          ? 'bg-white/15 text-[#f3d79e] ring-1 ring-white/30'
+                          : 'bg-gradient-to-br from-rose-50 to-rose-100 text-rose-800 ring-1 ring-rose-100'
+                      }`}
+                    >
+                      {planIcons[index]}
+                    </div>
+
+                    <h3 className={`font-display text-2xl font-bold ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
+                      {plan.name}
+                    </h3>
+
+                    <div className="mt-3 flex items-baseline gap-1.5">
+                      <span className={`text-5xl font-extrabold tracking-tight ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
+                        {plan.price}
+                      </span>
+                      <span className={`text-sm font-medium ${plan.highlighted ? 'text-white/70' : 'text-gray-500'}`}>
+                        /{plan.period}
+                      </span>
+                    </div>
+
+                    <div className={`my-6 h-px w-full ${plan.highlighted ? 'bg-gradient-to-r from-transparent via-white/30 to-transparent' : 'bg-gradient-to-r from-transparent via-gray-200 to-transparent'}`} />
+
+                    <ul className="mb-8 space-y-3.5">
+                      {plan.features.map((feature, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <div
+                            className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${
+                              plan.highlighted ? 'bg-white/20' : 'bg-rose-50'
+                            }`}
+                          >
+                            <IconCheck className={`h-4 w-4 ${plan.highlighted ? 'text-[#f3d79e]' : 'text-rose-800'}`} />
+                          </div>
+                          <span className={`text-sm ${plan.highlighted ? 'text-white/90' : 'text-gray-700'}`}>
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <button
+                      onClick={() => navigate(plan.route)}
+                      className={`group/btn mt-auto flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
+                        plan.highlighted
+                          ? 'bg-white text-rose-800 shadow-lg hover:bg-amber-50 hover:shadow-xl'
+                          : 'bg-rose-800 text-white shadow-lg shadow-rose-800/30 hover:bg-rose-900 hover:shadow-xl hover:shadow-rose-800/40'
+                      }`}
+                    >
+                      {plan.cta}
+                      <IconArrowRight className="transition-transform duration-300 group-hover/btn:translate-x-1" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* trust line */}
+          <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-gray-500">
+            <span className="inline-flex items-center gap-2">
+              <IconLock className="h-4 w-4 text-rose-800" />
+              Secure payments
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <IconSparkle className="h-4 w-4 text-rose-800" />
+              Upgrade anytime
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <IconShield className="h-4 w-4 text-rose-800" />
+              Verified profiles only
+            </span>
           </div>
         </div>
       </section>
-
       {/* ==================== UPCOMING ==================== */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
