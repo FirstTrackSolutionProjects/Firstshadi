@@ -681,63 +681,67 @@ const Landing = () => {
           </div>
         </div>
       </section>
-      {/* ==================== HOW IT WORKS ==================== */}
-      <section className="py-20 px-4 bg-[#faf7f5]">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold tracking-wider uppercase mb-4">
+           {/* ==================== HOW IT WORKS ==================== */}
+      <section className="relative overflow-hidden py-24 px-4 bg-[#faf7f5]">
+        {/* background glows */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-rose-100/70 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-[#e0b46a]/15 blur-3xl" />
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold tracking-wider uppercase mb-5 shadow-sm">
+              <IconSparkle className="w-3 h-3" />
               Simple Process
             </span>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               How It <span className="italic text-rose-800">Works</span>
             </h2>
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className="h-px w-14 bg-gradient-to-r from-transparent to-[#e0b46a]" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#e0b46a]" />
+              <span className="h-px w-14 bg-gradient-to-l from-transparent to-[#e0b46a]" />
+            </div>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Your journey to finding your soulmate in four simple steps.
             </p>
           </div>
 
-          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="hidden lg:block absolute top-8 left-[12%] right-[12%] border-t-2 border-dashed border-rose-200" />
-            {howItWorksSteps.map((step, index) => (
-              <div key={index} className="relative flex flex-col items-center text-center group">
-                <div className="relative z-10 w-16 h-16 rounded-full bg-rose-800 flex items-center justify-center font-display text-white text-xl font-bold mb-4 shadow-lg shadow-rose-200 ring-4 ring-[#faf7f5] transition-transform duration-300 group-hover:scale-110">
-                  {step.step}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-14">
+            {howItWorksSteps.map((step, index) => {
+              const stepIcons = [
+                <IconUsers className="w-7 h-7" />,
+                <IconSearch className="w-7 h-7" />,
+                <IconChat className="w-7 h-7" />,
+                <IconHeart className="w-7 h-7" />,
+              ];
+              return (
+                <div key={index} className="group relative pt-8">
+                  {/* connector line to next step */}
+                  {index < howItWorksSteps.length - 1 && (
+                    <div className="hidden lg:block absolute top-8 left-1/2 z-0 w-[calc(100%+2rem)] border-t-2 border-dashed border-rose-300" />
+                  )}
+
+                  {/* icon circle */}
+                  <div className="absolute top-0 left-1/2 z-20 -translate-x-1/2">
+                    <div className="absolute inset-0 rounded-full bg-rose-800/30 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-800 to-rose-900 text-white shadow-lg shadow-rose-200 ring-4 ring-[#faf7f5] transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                      {stepIcons[index]}
+                    </div>
+                  </div>
+
+                  {/* card */}
+                  <div className="relative z-10 overflow-hidden rounded-2xl border border-gray-200 bg-white px-6 pb-8 pt-12 text-center transition-all duration-500 group-hover:-translate-y-2 group-hover:border-rose-200 group-hover:shadow-2xl group-hover:shadow-rose-100">
+                    <div className="absolute inset-x-0 top-0 h-1 origin-center scale-x-0 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800 transition-transform duration-500 group-hover:scale-x-100" />
+
+                    <span className="inline-block rounded-full bg-rose-50 px-3 py-0.5 text-xs font-bold tracking-widest text-rose-800">
+                      STEP {step.step}
+                    </span>
+                    <h3 className="mt-3 text-lg font-semibold text-gray-900">{step.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-600">{step.description}</p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-gray-600 text-sm">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-            {/* ==================== HOW IT WORKS ==================== */}
-      <section className="py-20 px-4 bg-[#faf7f5]">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-800 text-xs font-semibold tracking-wider uppercase mb-4">
-              Simple Process
-            </span>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              How It <span className="italic text-rose-800">Works</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Your journey to finding your soulmate in four simple steps.
-            </p>
-          </div>
-
-          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="hidden lg:block absolute top-8 left-[12%] right-[12%] border-t-2 border-dashed border-rose-200" />
-            {howItWorksSteps.map((step, index) => (
-              <div key={index} className="relative flex flex-col items-center text-center group">
-                <div className="relative z-10 w-16 h-16 rounded-full bg-rose-800 flex items-center justify-center font-display text-white text-xl font-bold mb-4 shadow-lg shadow-rose-200 ring-4 ring-[#faf7f5] transition-transform duration-300 group-hover:scale-110">
-                  {step.step}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-gray-600 text-sm">{step.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
