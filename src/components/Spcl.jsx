@@ -7,11 +7,7 @@ const IconDocument = () => (
   </svg>
 );
 
-const IconConnect = () => (
-  <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-  </svg>
-);
+
 
 const SoulmateSteps = () => {
   const navigate = useNavigate();
@@ -26,7 +22,7 @@ const SoulmateSteps = () => {
     },
     {
       id: 2,
-      icon: <IconConnect />,
+      icon: <span className="text-5xl leading-none">💑</span>,
       title: 'Connect',
       description: 'Select & Connect with Matches you like',
       route: '/ncon',
@@ -76,7 +72,7 @@ const SoulmateSteps = () => {
               <div className="relative">
                 <div className="relative mx-auto mb-6 inline-flex">
                   <div className="absolute inset-0 rounded-full bg-rose-800/30 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
-                  <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-rose-800 to-rose-900 text-white shadow-lg shadow-rose-200 ring-4 ring-rose-50 transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
+                                    <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-rose-50 to-rose-100 text-rose-800 shadow-lg shadow-rose-200 ring-4 ring-white transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
                     {icon}
                   </div>
                 </div>
