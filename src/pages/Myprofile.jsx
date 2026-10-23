@@ -200,11 +200,13 @@ const Myprofile = () => {
     }
   };
 
-  if (loading) {
+    if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center font-sans">
-        <div className="text-center p-8 bg-white rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold text-slate-700">Loading Profile...</h2>
+      <div className="flex min-h-[70vh] items-center justify-center bg-[#faf7f5] px-4 font-sans">
+        <div className="w-full max-w-md rounded-3xl border border-rose-100 bg-white p-10 text-center shadow-xl shadow-rose-100/60">
+          <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-4 border-rose-100 border-t-rose-800" />
+          <h2 className="text-lg font-semibold text-gray-800">Loading your profile...</h2>
+          <p className="mt-1 text-sm text-gray-500">Please wait a moment</p>
         </div>
       </div>
     );
@@ -212,10 +214,18 @@ const Myprofile = () => {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center font-sans">
-        <div className="text-center p-8 bg-white rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold text-slate-700">{error || 'No profile yet'}</h2>
-          <a href="/box" className="mt-4 inline-block px-4 py-2 bg-red-600 text-white rounded">
+      <div className="flex min-h-[70vh] items-center justify-center bg-[#faf7f5] px-4 font-sans">
+        <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-rose-100 bg-white p-10 text-center shadow-xl shadow-rose-100/60">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800" />
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-3xl ring-4 ring-rose-100">
+            👤
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">{error || 'No profile yet'}</h2>
+          <p className="mt-1 text-sm text-gray-500">Create your profile to start finding matches.</p>
+          <a
+            href="/box"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-rose-800 px-6 py-3 font-semibold text-white shadow-lg shadow-rose-800/30 transition-all hover:-translate-y-0.5 hover:bg-rose-900"
+          >
             Create Profile
           </a>
         </div>
@@ -231,35 +241,48 @@ const Myprofile = () => {
   const filled = rows.filter((r) => r.value !== null && r.value !== undefined && String(r.value).trim() !== '').length;
   const completeness = rows.length ? Math.round((filled / rows.length) * 100) : 0;
 
-  const chips = [
-    displayProfile.age ? `${displayProfile.age} yrs` : null,
-    displayProfile.religion,
-    displayProfile.community,
-    displayProfile.city,
-  ].filter(Boolean);
+    const filledLabel = `${filled} of ${rows.length} fields filled`;
 
   return (
     <div>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-pink-50/40 font-sans px-4 pb-16">
-        <div className="mx-auto w-full max-w-4xl pt-8">
+      <div className="min-h-screen bg-[#faf7f5] px-4 pb-20 font-sans">
+        <div className="pointer-events-none fixed -top-24 -left-24 h-96 w-96 rounded-full bg-rose-100/60 blur-3xl" />
+        <div className="pointer-events-none fixed -bottom-24 -right-24 h-96 w-96 rounded-full bg-[#e0b46a]/10 blur-3xl" />
+
+        <div className="relative mx-auto w-full max-w-4xl pt-8">
+          {/* editing banner */}
+          {isEditing && (
+            <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#e0b46a]/50 bg-[#e0b46a]/10 px-5 py-3 text-sm font-medium text-[#8a6320]">
+              <EditIcon />
+              You are in editing mode. Make your changes and click Save.
+            </div>
+          )}
+
           {/* HERO CARD */}
-          <div className="bg-white rounded-3xl shadow-xl shadow-indigo-100/60 overflow-hidden">
-            <div className="h-40 bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-500 relative">
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,white,transparent_40%),radial-gradient(circle_at_80%_60%,white,transparent_35%)]" />
+          <div className="relative overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-2xl shadow-rose-100/60">
+            <div className="relative h-44 bg-gradient-to-br from-rose-800 via-rose-800 to-rose-900">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(224,180,106,0.35),transparent_40%),radial-gradient(circle_at_85%_70%,rgba(255,255,255,0.18),transparent_35%)]" />
+              <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
+              <div className="absolute -bottom-12 right-32 h-32 w-32 rounded-full bg-white/10" />
             </div>
 
-            <div className="px-6 sm:px-10 pb-8">
-              <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-16">
+            <div className="px-6 pb-8 sm:px-10">
+              <div className="-mt-16 flex flex-col gap-4 sm:flex-row sm:items-end">
+                {/* avatar */}
                 <div className="relative self-center sm:self-auto">
-                  <img
-                    src={displayProfile.profile_photos?.[0] || 'https://placehold.co/200x200/e2e8f0/475569?text=Photo'}
-                    alt="Profile"
-                    className="w-32 h-32 sm:w-36 sm:h-36 object-cover rounded-full ring-4 ring-white shadow-lg bg-white"
-                  />
+                  <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-rose-800/40 via-[#e0b46a]/50 to-rose-800/40 blur-lg" />
+                  <div className="relative rounded-full bg-gradient-to-br from-rose-800 via-[#e0b46a] to-rose-800 p-1.5">
+                    <img
+                      src={displayProfile.profile_photos?.[0] || 'https://placehold.co/200x200/9f1239/ffffff?text=Photo'}
+                      alt="Profile"
+                      className="h-32 w-32 rounded-full border-4 border-white bg-white object-cover sm:h-36 sm:w-36"
+                    />
+                  </div>
                   {isEditing && (
                     <button
                       onClick={handleImageClick}
-                      className="absolute bottom-1 right-1 bg-indigo-600 text-white w-10 h-10 rounded-full flex items-center justify-center ring-4 ring-white hover:bg-indigo-700 transition"
+                      className="absolute bottom-1 right-1 flex h-10 w-10 items-center justify-center rounded-full bg-rose-800 text-white ring-4 ring-white transition hover:bg-rose-900"
                       title="Change profile image"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -268,19 +291,30 @@ const Myprofile = () => {
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                 </div>
 
-                <div className="flex-grow text-center sm:text-left sm:pb-2">
-                  <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">{profileName}</h1>
-                  {displayProfile.email && <p className="text-slate-500 mt-1">{displayProfile.email}</p>}
+                {/* name + chips */}
+                <div className="flex-grow text-center sm:pb-2 sm:text-left">
+                  <h1 className="font-display text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                    {profileName}
+                  </h1>
+                  {displayProfile.email && <p className="mt-1 text-sm text-gray-500">{displayProfile.email}</p>}
                   {(chips.length > 0 || displayProfile.diet) && (
-                    <div className="mt-3 flex flex-wrap justify-center sm:justify-start gap-2">
+                    <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
                       {chips.map((c, i) => (
-                        <span key={i} className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        <span
+                          key={i}
+                          className="rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-800"
+                        >
                           {c}
                         </span>
                       ))}
                       {displayProfile.diet && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">
-                          <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${displayProfile.diet.toLowerCase().replace(/\s+/g, '') === 'veg' ? 'bg-green-600' : 'bg-red-600'}`} />
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e0b46a]/50 bg-[#e0b46a]/10 px-3 py-1 text-xs font-semibold text-[#8a6320]">
+                          <span
+                            aria-hidden="true"
+                            className={`h-2.5 w-2.5 rounded-full ${
+                              displayProfile.diet.toLowerCase().replace(/\s+/g, '') === 'veg' ? 'bg-green-600' : 'bg-red-600'
+                            }`}
+                          />
                           {displayProfile.diet}
                         </span>
                       )}
@@ -288,22 +322,37 @@ const Myprofile = () => {
                   )}
                 </div>
 
+                {/* actions */}
                 <div className="flex justify-center gap-2 sm:pb-2">
                   {isEditing ? (
                     <>
-                      <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold shadow-md shadow-emerald-200 hover:bg-emerald-600 transition disabled:opacity-50">
+                      <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="flex items-center gap-2 rounded-xl bg-rose-800 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-800/30 transition-all hover:-translate-y-0.5 hover:bg-rose-900 disabled:opacity-50"
+                      >
                         <SaveIcon /> {saving ? 'Saving...' : 'Save'}
                       </button>
-                      <button onClick={handleCancel} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition">
+                      <button
+                        onClick={handleCancel}
+                        className="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-rose-800 hover:text-rose-800"
+                      >
                         <CancelIcon /> Cancel
                       </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={handleEdit} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-md shadow-indigo-200 hover:shadow-lg hover:-translate-y-0.5 transition">
+                      <button
+                        onClick={handleEdit}
+                        className="flex items-center gap-2 rounded-xl bg-rose-800 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-800/30 transition-all hover:-translate-y-0.5 hover:bg-rose-900 hover:shadow-xl"
+                      >
                         <EditIcon /> Edit Profile
                       </button>
-                      <button onClick={handleDelete} title="Delete profile" className="flex items-center px-3 py-2.5 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition">
+                      <button
+                        onClick={handleDelete}
+                        title="Delete profile"
+                        className="flex items-center rounded-xl border border-transparent px-3 py-2.5 text-gray-400 transition hover:border-red-100 hover:bg-red-50 hover:text-red-600"
+                      >
                         <DeleteIcon />
                       </button>
                     </>
@@ -311,18 +360,19 @@ const Myprofile = () => {
                 </div>
               </div>
 
-              {/* COMPLETENESS */}
-              <div className="mt-8">
-                <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="font-semibold text-slate-700">Profile completeness</span>
-                  <span className="font-bold text-indigo-600">{completeness}%</span>
+              {/* completeness */}
+              <div className="mt-8 rounded-2xl border border-rose-100 bg-[#faf7f5] p-5">
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-semibold text-gray-800">Profile completeness</span>
+                  <span className="font-bold text-rose-800">{completeness}%</span>
                 </div>
-                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-rose-100">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500 transition-all duration-700"
+                    className="h-full rounded-full bg-gradient-to-r from-rose-800 to-[#e0b46a] transition-all duration-700"
                     style={{ width: `${completeness}%` }}
                   />
                 </div>
+                <p className="mt-2 text-xs text-gray-500">{filledLabel}</p>
               </div>
             </div>
           </div>
@@ -330,43 +380,61 @@ const Myprofile = () => {
           {/* SECTIONS */}
           <div className="mt-6 space-y-6">
             {sections.map((section) => (
-              <div key={section.title} className="bg-white rounded-3xl shadow-lg shadow-slate-200/60 p-6 sm:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-lg">{section.icon}</span>
-                  <h2 className="text-lg font-bold text-slate-800">{section.title}</h2>
+              <div
+                key={section.title}
+                className="group relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-lg shadow-rose-100/30 transition-all duration-500 hover:border-rose-200 hover:shadow-xl hover:shadow-rose-100/60 sm:p-8"
+              >
+                <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-rose-800 via-[#e0b46a] to-rose-800 transition-transform duration-500 group-hover:scale-x-100" />
+
+                <div className="mb-6 flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-rose-50 to-rose-100 text-xl ring-1 ring-rose-100">
+                    {section.icon}
+                  </span>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">{section.title}</h2>
+                    <p className="text-xs text-gray-400">{section.items.length} details</p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {section.items.map(({ label, value, path }, idx) => {
                     const isDate = /date of birth/i.test(label);
                     const isDiet = path[path.length - 1] === 'diet';
+                    const inputClass =
+                      'w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-800 outline-none transition focus:border-rose-800 focus:ring-2 focus:ring-rose-800/20';
                     return (
                       <div
                         key={idx}
-                        className={`rounded-2xl p-4 border transition ${
+                        className={`rounded-2xl border p-4 transition-all duration-300 ${
                           isEditing
-                            ? 'bg-white border-slate-200'
-                            : 'bg-slate-50/70 border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/40'
+                            ? 'border-gray-200 bg-white'
+                            : 'border-gray-100 bg-[#faf7f5] hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50/60'
                         }`}
                       >
-                        <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                           {label}
                         </span>
-                        {isEditing ? isDiet ? (
-                          <select value={value || ''} onChange={(e) => handleChange(path, e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
-                            <option value="">Select diet</option><option value="Veg">Veg</option><option value="Non Veg">Non Veg</option>
-                          </select>
+                        {isEditing ? (
+                          isDiet ? (
+                            <select
+                              value={value || ''}
+                              onChange={(e) => handleChange(path, e.target.value)}
+                              className={inputClass}
+                            >
+                              <option value="">Select diet</option>
+                              <option value="Veg">Veg</option>
+                              <option value="Non Veg">Non Veg</option>
+                            </select>
+                          ) : (
+                            <input
+                              type={isDate ? 'date' : 'text'}
+                              value={isDate ? String(value).slice(0, 10) : String(value)}
+                              onChange={(e) => handleChange(path, e.target.value)}
+                              className={inputClass}
+                            />
+                          )
                         ) : (
-                          <input
-                            type={isDate ? 'date' : 'text'}
-                            value={isDate ? String(value).slice(0, 10) : String(value)}
-                            onChange={(e) => handleChange(path, e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
-                          />
-                        ) : (
-                          <span className="block text-slate-800 font-semibold break-words">
-                            {formatValue(value)}
-                          </span>
+                          <span className="block break-words font-semibold text-gray-900">{formatValue(value)}</span>
                         )}
                       </div>
                     );
