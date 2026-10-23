@@ -55,7 +55,7 @@ const Navbar = () => {
       try {
         const res = await notificationService.getAll({ is_read: 'false', limit: 1 });
         if (res.success) setNotificationCount(res.data.unread_count || 0);
-      } catch (e) { /* silent */ }
+      } catch { /* silent */ }
     };
     fetchCount();
     const id = setInterval(fetchCount, 30000);
@@ -255,7 +255,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex-1 space-y-1 overflow-y-auto p-4">
-          {navLinks.map(({ to, label, icon: Icon }) => (
+          {navLinks.map(({ to, label, icon }) => (
             <Link
               key={to}
               to={to}
@@ -264,7 +264,7 @@ const Navbar = () => {
                 isActive(to) ? 'bg-rose-800 text-white' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-800'
               }`}
             >
-              <Icon className="h-5 w-5" />
+              {React.createElement(icon, { className: 'h-5 w-5' })}
               {label}
             </Link>
           ))}

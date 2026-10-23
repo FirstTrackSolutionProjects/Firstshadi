@@ -237,6 +237,12 @@ const Myprofile = () => {
   const rows = flatten(displayProfile);
   const sections = groupRows(rows);
   const profileName = [displayProfile.first_name, displayProfile.last_name].filter(Boolean).join(' ') || 'My Profile';
+  const chips = [
+    displayProfile.age ? `${displayProfile.age} yrs` : null,
+    displayProfile.religion,
+    displayProfile.community,
+    displayProfile.city,
+  ].filter(Boolean);
 
   const filled = rows.filter((r) => r.value !== null && r.value !== undefined && String(r.value).trim() !== '').length;
   const completeness = rows.length ? Math.round((filled / rows.length) * 100) : 0;
