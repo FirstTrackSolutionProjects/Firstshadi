@@ -364,7 +364,7 @@ function Sol() {
         if (res.success) {
           setRequestedUsers(new Set((res.data || []).map((c) => c.to_user_uuid)));
         }
-      } catch (e) {
+            } catch {
         // Silent
       }
     })();
